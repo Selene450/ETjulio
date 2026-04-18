@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Documentation - Sistema de Pruebas de Entidades</title>
+    <link rel="stylesheet" href="css/IU.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .api-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .api-header h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+
+        .api-header p {
+            margin: 10px 0 0 0;
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .api-nav {
+            background: #f5f5f5;
+            padding: 15px;
+            border-bottom: 2px solid #ddd;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .api-nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .api-nav a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .api-nav a:hover {
+            color: #764ba2;
+        }
+
+        .api-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .api-section {
+            margin-bottom: 50px;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .api-section h2 {
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+
+        .class-doc {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-left: 4px solid #667eea;
+            border-radius: 4px;
+        }
+
+        .class-doc h3 {
+            color: #764ba2;
+            margin-top: 0;
+        }
+
+        .method-doc {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .method-name {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .method-signature {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+
+        .method-description {
+            margin-bottom: 10px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 13px;
+            color: #555;
+        }
+
+        .method-params,
+        .method-returns {
+            margin-bottom: 8px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 13px;
+        }
+
+        .param-name,
+        .return-type {
+            color: #764ba2;
+            font-weight: bold;
+        }
+
+        .param-type {
+            color: #667eea;
+        }
+
+        .table-params {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 12px;
+        }
+
+        .table-params th,
+        .table-params td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .table-params th {
+            background-color: #f5f5f5;
+            font-weight: bold;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .workflow-diagram {
+            background: #f9f9f9;
+            border: 2px solid #ddd;
+            padding: 20px;
+            border-radius: 4px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            white-space: pre;
+        }
+
+        .section-intro {
+            color: #555;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .back-to-top {
+            text-align: right;
+            margin-top: 20px;
+        }
+
+        .back-to-top a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            margin: 2px;
+            background: #667eea;
+            color: white;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .badge.static {
+            background: #4caf50;
+        }
+
+        .badge.instance {
+            background: #ff9800;
+        }
+
+        .footer-api {
+            text-align: center;
+            padding: 30px;
+            color: #999;
+            font-size: 12px;
+            border-top: 1px solid #ddd;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="api-header">
+        <h1>API Documentation</h1>
+        <p>Sistema de Pruebas para Gestión de Entidades de Base de Datos</p>
+    </div>
+
+    <div class="api-nav">
+        <ul>
+            <li><a href="#overview">Descripción General</a></li>
+            <li><a href="#validations">Validations</a></li>
+            <li><a href="#validatefields">ValidateFieldsForm</a></li>
+            <li><a href="#testform">TestForm</a></li>
+            <li><a href="#testsubmit">TestSubmit</a></li>
+            <li><a href="#gestor">Gestor</a></li>
+            <li><a href="#workflows">Workflows</a></li>
+        </ul>
+    </div>
+
+    <div class="api-container">
+        <!-- Overview Section -->
+        <div class="api-section" id="overview">
+            <h2>Descripción General</h2>
+            <p class="section-intro">
+                Este sistema proporciona un marco completo para verificar y probar la estructura, 
+                formato y envío de formularios para entidades de base de datos. Está compuesto 
+                por cuatro clases principales que trabajan juntas para validar datos y ejecutar pruebas.
+            </p>
+
+            <h3>Arquitectura del Sistema</h3>
+            <div class="workflow-diagram">┌─────────────────────────────────────────┐
+│         ENTRY POINT: index.html         │
+│  (Menu → Gestor → TestForm/TestSubmit) │
+└─────────────┬───────────────────────────┘
+              │
+              ├──→ Gestor_Class.js
+              │    └─ Carga entidades y validación de estructura
+              │
+              ├──→ ValidateFieldsForm_Class.js
+              │    └─ Crea campos HTML y ejecuta validaciones
+              │
+              ├──→ Validations_Class.js
+              │    └─ Métodos estáticos de validación
+              │
+              ├──→ TestForm_Class.js
+              │    └─ Verifica estructura, definiciones y datos
+              │
+              └──→ TestSubmit_Class.js
+                   └─ Prueba validación de envío por acción</div>
+
+            <h3>Flujo de Uso Típico</h3>
+            <ol>
+                <li>Usuario selecciona entidad del menú en index.html</li>
+                <li>Gestor carga estructura y tests de la entidad</li>
+                <li>Usuario puede elegir:
+                    <ul>
+                        <li><strong>TestForm:</strong> Verifica estructura de atributos y ejecuta pruebas unitarias</li>
+                        <li><strong>TestSubmit:</strong> Verifica validación de formularios por acción (CREATE, UPDATE, etc.)</li>
+                    </ul>
+                </li>
+                <li>Cada clase muestra resultados en modal con opción de ver detalles</li>
+            </ol>
+        </div>
+
+        <!-- Validations Section -->
+        <div class="api-section" id="validations">
+            <h2>Validations_Class</h2>
+            <p class="section-intro">
+                Proporciona métodos estáticos para realizar validaciones individuales en campos de formulario.
+                Cada método recibe el ID del elemento HTML y retorna <code>true</code> o un mensaje de error.
+            </p>
+
+            <div class="class-doc">
+                <h3>Descripción</h3>
+                <p>Clase con métodos estáticos para validar campos individuales. Todos los métodos 
+                   trabajan con IDs de elementos HTML del DOM.</p>
+
+                <h3>Métodos</h3>
+
+                <div class="method-doc">
+                    <div class="method-name"><span class="badge static">Static</span> isRequired()</div>
+                    <div class="method-signature">Validations.isRequired(elementId) → boolean|string</div>
+                    <div class="method-description">Valida que el campo no esté vacío</div>
+                    <div class="method-params">
+                        <strong>Parámetros:</strong>
+                        <table class="table-params">
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Tipo</th>
+                                <th>Descripción</th>
+                            </tr>
+                            <tr>
+                                <td>elementId</td>
+                                <td>string</td>
+                                <td>ID del elemento HTML a validar</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="method-returns">
+                        <strong>Retorna:</strong> <span class="return-type">true</span> si es válido, 
+                        o string con mensaje de error
+                    </div>
+                </div>
+
+                <div class="method-doc">
+                    <div class="method-name"><span class="badge static">Static</span> isInteger()</div>
+                    <div class="method-signature">Validations.isInteger(elementId) → boolean|string</div>
+                    <div class="method-description">Valida que el valor sea un número entero</div>
+                    <div class="method-params">
+                        <strong>Retorna:</strong> <span class="return-type">true</span> si es válido
+                    </div>
+                </div>
+
+                <div class="method-doc">
+                    <div class="method-name"><span class="badge static">Static</span> hasMinSize()</div>
+                    <div class="method-signature">Validations.hasMinSize(elementId, minSize) → boolean|string</div>
+                    <div class="method-description">Valida que el valor tenga un tamaño mínimo</div>
+                    <div class="method-params">
+                        <strong>Parámetros:</strong>
+                        <table class="table-params">
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Tipo</th>
+                                <th>Descripción</th>
+                            </tr>
+                            <tr>
+                                <td>elementId</td>
+                                <td>string</td>
+                                <td>ID del elemento HTML</td>
+                            </tr>
+                            <tr>
+                                <td>minSize</td>
+                                <td>number</td>
+                                <td>Tamaño mínimo requerido</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="method-doc">
+                    <div class="method-name"><span class="badge static">Static</span> hasMaxSize()</div>
+                    <div class="method-signature">Validations.hasMaxSize(elementId, maxSize) → boolean|string</div>
+                    <div class="method-description">Valida que el valor tenga un tamaño máximo</div>
+                    <div class="method-params">
+                        <strong>Parámetros:</strong>
+                        <table class="table-params">
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Tipo</th>
+                                <th>Descripción</th>
+                            </tr>
+                            <tr>
+                                <td>elementId</td>
+                                <td>string</td>
+                                <td>ID del elemento HTML</td>
+                            </tr>
+                            <tr>
+                                <td>maxSize</td>
+                                <td>number</td>
+                                <td>Tamaño máximo permitido</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="method-doc">
+                    <div class="method-name"><span class="badge static">Static</span> noAccents()</div>
+                    <div class="method-signature">Validations.noAccents(elementId) → boolean|string</div>
+                    <div class="method-description">Valida que el valor no contenga acentos</div>
+                </div>
+
+                <div class="method-doc">
+                    <div class="method-name"><span class="badge static">Static</span> noSpaces()</div>
+                    <div class="method-signature">Validations.noSpaces(elementId) → boolean|string</div>
+                    <div class="method-description">Valida que el valor no contenga espacios</div>
+                </div>
+
+                <div class="method-doc">
+                    <div class="method-name"><span class="badge static">Static</span> isValidDate()</div>
+                    <div class="method-signature">Validations.isValidDate(elementId) → boolean|string</div>
+                    <div class="method-description">Valida que el valor sea una fecha válida (formato DD-MM-YYYY)</div>
+                </div>
+
+                <div class="method-doc">
+                    <div class="method-name"><span class="badge static">Static</span> isValidFileType()</div>
+                    <div class="method-signature">Validations.isValidFileType(elementId, validTypes) → boolean|string</div>
+                    <div class="method-description">Valida que el archivo sea de un tipo permitido</div>
+                </div>
+
+                <div class="method-doc">
+                    <div class="method-name"><span class="badge static">Static</span> isValidOption()</div>
+                    <div class="method-signature">Validations.isValidOption(elementId, optionValues) → boolean|string</div>
+                    <div class="method-description">Valida que el valor sea una opción válida de un select</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ValidateFieldsForm Section -->
+        <div class="api-section" id="validatefields">
+            <h2>ValidateFieldsForm_Class</h2>
+            <p class="section-intro">
+                Crea elementos HTML para campos individuales basados en la definición de estructura 
+                de la entidad.  Integra con Validations_Class para ejecutar validaciones.
+            </p>
+
+            <div class="class-doc">
+                <h3>Constructor</h3>
+                <div class="method-signature">new ValidateFieldsForm(fieldDefinition, value = '')</div>
+                <div class="method-params">
+                    <table class="table-params">
+                        <tr>
+                            <th>Parámetro</th>
+                            <th>Tipo</th>
+                            <th>Descripción</th>
+                        </tr>
+                        <tr>
+                            <td>fieldDefinition</td>
+                            <td>Object</td>
+                            <td>Objeto con propiedades: name, type, validations, etc.</td>
+                        </tr>
+                        <tr>
+                            <td>value</td>
+                            <td>string</td>
+                            <td>Valor inicial del campo (opcional)</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <h3>Métodos</h3>
+
+                <div class="method-doc">
+                    <div class="method-name"><span class="badge instance">Instance</span> createField()</div>
+                    <div class="method-signature">createField() → string</div>
+                    <div class="method-description">Genera el HTML del campo selon su tipo (input, textarea, select, date, file)</div>
+                    <div class="method-returns">
+                        <strong>Retorna:</strong> HTML del campo como string
+                    </div>
+                </div>
+
+                <div class="method-doc">
+                    <div class="method-name"><span class="badge instance">Instance</span> getValue()</div>
+                    <div class="method-signature">getValue() → *</div>
+                    <div class="method-description">Obtiene el valor actual del campo desde el DOM</div>
+                </div>
+
+                <div class="method-doc">
+                    <div class="method-name"><span class="badge instance">Instance</span> setValue()</div>
+                    <div class="method-signature">setValue(value)</div>
+                    <div class="method-description">Establece el valor del campo en el DOM</div>
+                </div>
+
+                <div class="method-doc">
+                    <div class="method-name"><span class="badge instance">Instance</span> validateField()</div>
+                    <div class="method-signature">validateField(entityClass = null) → Object</div>
+                    <div class="method-description">Ejecuta todas las validaciones del campo</div>
+                    <div class="method-returns">
+                        <strong>Retorna:</strong> Objeto con estructura:
+                        <div class="code-block">{
+  fieldName: string,
+  isValid: boolean,
+  errors: Array,
+  warnings: Array
+}</div>
+                    </div>
+                </div>
+
+                <div class="method-doc">
+                    <div class="method-name"><span class="badge instance">Instance</span> clear()</div>
+                    <div class="method-signature">clear()</div>
+                    <div class="method-description">Limpia el valor del campo</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TestForm Section -->
+        <div class="api-section" id="testform">
+            <h2>TestForm_Class</h2>
+            <p class="section-intro">
+                Verifica la integridad de la estructura de la entidad, las definiciones de pruebas 
+                y los datos de prueba. Ejecuta todas las validaciones y muestra resultados detallados.
+            </p>
+
+            <div class="class-doc">
+                <h3>Constructor</h3>
+                <div class="method-signature">new TestForm(entityName, structure)</div>
+                <div class="method-params">
+                    <table class="table-params">
+                        <tr>
+                            <th>Parámetro</th>
+                            <th>Tipo</th>
+                            <th>Descripción</th>
+                        </tr>
+                        <tr>
+                            <td>entityName</td>
+                            <td>string</td>
+                            <td>Nombre de la entidad a probar</td>
+                        </tr>
+                        <tr>
+                            <td>structure</td>
+                            <td>Object</td>
+                            <td>Objeto de estructura de la entidad con propiedades attributes, etc.</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <h3>Métodos Principales</h3>
+
+                <div class="method-doc">
+                    <div class="method-name"><span class="badge instance">Instance</span> analyze()</div>
+                    <div class="method-signature">analyze() → boolean</div>
+                    <div class="method-description">Inicia el análisis completo: estructura, definiciones, datos y ejecución</div>
+                    <div class="method-returns">
+                        <strong>Retorna:</strong> <span class="return-type">true</span> si tuvo éxito
+                    </div>
+                </div>
+
+                <div class="method-doc">
+                    <div class="method-name"><span class="badge instance">Instance</span> analyzeStructure()</div>
+                    <div class="method-signature">analyzeStructure() → Object</div>
+                    <div class="method-description">Valida la estructura de la entidad</div>
+                    <div class="method-returns">
+                        <strong>Retorna:</strong> Objeto con: {valid, count, attributes, attributeDetails}
+                    </div>
+                </div>
+
+                <div class="method-doc">
+                    <div class="method-name"><span class="badge instance">Instance</span> analyzeTestDefinitions()</div>
+                    <div class="method-signature">analyzeTestDefinitions() → Object</div>
+                    <div class="method-description">Analiza las definiciones de pruebas</div>
+                    <div class="method-returns">
+                        <strong>Retorna:</strong> {count, wellDefined, issues}
+                    </div>
+                </div>
+
+                <div class="method-doc">
+                    <div class="method-name"><span class="badge instance">Instance</span> analyzeTestData()</div>
+                    <div class="method-signature">analyzeTestData() → Object</div>
+                    <div class="method-description">Analiza los datos de prueba</div>
+                    <div class="method-returns">
+                        <strong>Retorna:</strong> {count, wellTyped, byType, issues}
+                    </div>
+                </div>
+
+                <div class="method-doc">
+                    <div class="method-name"><span class="badge instance">Instance</span> executeAllTests()</div>
+                    <div class="method-signature">executeAllTests() → Object</div>
+                    <div class="method-description">Ejecuta todas las pruebas definidas</div>
+                    <div class="method-returns">
+                        <strong>Retorna:</strong> {executed, correct, incorrect, results}
+                    </div>
+                </div>
+
+                <div class="method-doc">
+                    <div class="method-name"><span class="badge instance">Instance</span> displayResults()</div>
+                    <div class="method-signature">displayResults(analysisResults)</div>
+                    <div class="method-description">Muestra los resultados en una ventana modal</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TestSubmit Section -->
+        <div class="api-section" id="testsubmit">
+            <h2>TestSubmit_Class</h2>
+            <p class="section-intro">
+                Verifica la validación de formularios para todas las acciones (CREATE, UPDATE, EDIT, 
+                DELETE, READ). Ejecuta CheckSubmit() y valida que el comportamiento sea el esperado.
+            </p>
+
+            <div class="class-doc">
+                <h3>Constructor</h3>
+                <div class="method-signature">new TestSubmit(entityName, testSubmitData)</div>
+                <div class="method-params">
+                    <table class="table-params">
+                        <tr>
+                            <th>Parámetro</th>
+                            <th>Tipo</th>
+                            <th>Descripción</th>
+                        </tr>
+                        <tr>
+                            <td>entityName</td>
+                            <td>string</td>
+                            <td>Nombre de la entidad</td>
+                        </tr>
+                        <tr>
+                            <td>testSubmitData</td>
+                            <td>Array</td>
+                            <td>Array de pruebas de formulario con estructura: {action, formData, expectError, description}</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <h3>Métodos Principales</h3>
+
+                <div class="method-doc">
+                    <div class="method-name"><span class="badge instance">Instance</span> analyze()</div>
+                    <div class="method-signature">analyze() → boolean</div>
+                    <div class="method-description">Inicia el análisis de todas las acciones</div>
+                    <div class="method-returns">
+                        <strong>Retorna:</strong> <span class="return-type">true</span> si tuvo éxito
+                    </div>
+                </div>
+
+                <div class="method-doc">
+                    <div class="method-name"><span class="badge instance">Instance</span> analyzeAllActions()</div>
+                    <div class="method-signature">analyzeAllActions() → Object</div>
+                    <div class="method-description">Analiza CREATE, UPDATE, EDIT, DELETE, READ</div>
+                    <div class="method-returns">
+                        <strong>Retorna:</strong> Objeto con análisis para cada acción
+                    </div>
+                </div>
+
+                <div class="method-doc">
+                    <div class="method-name"><span class="badge instance">Instance</span> executeSubmitTest()</div>
+                    <div class="method-signature">executeSubmitTest(action, test, index) → Object</div>
+                    <div class="method-description">Ejecuta una prueba individual de envío</div>
+                    <div class="method-params">
+                        <table class="table-params">
+                            <tr>
+                                <th>Parámetro</th>
+                                <th>Tipo</th>
+                                <th>Descripción</th>
+                            </tr>
+                            <tr>
+                                <td>action</td>
+                                <td>string</td>
+                                <td>CREATE|UPDATE|EDIT|DELETE|READ</td>
+                            </tr>
+                            <tr>
+                                <td>test</td>
+                                <td>Object</td>
+                                <td>Objeto de prueba a ejecutar</td>
+                            </tr>
+                            <tr>
+                                <td>index</td>
+                                <td>number</td>
+                                <td>Índice de la prueba</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="method-returns">
+                        <strong>Retorna:</strong> {testNumber, action, expectError, hasErrors, correct}
+                    </div>
+                </div>
+
+                <div class="method-doc">
+                    <div class="method-name"><span class="badge instance">Instance</span> displayResults()</div>
+                    <div class="method-signature">displayResults(analyses)</div>
+                    <div class="method-description">Muestra resumen en modal con opción de ver detalles</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gestor Section -->
+        <div class="api-section" id="gestor">
+            <h2>Gestor_Class</h2>
+            <p class="section-intro">
+                Administra la carga de entidades y coordina la ejecución de TestForm y TestSubmit.
+                Valida la existencia de archivos y estructura de la entidad.
+            </p>
+
+            <div class="class-doc">
+                <h3>Constructor</h3>
+                <div class="method-signature">new Gestor(entityName)</div>
+                <div class="method-params">
+                    <table class="table-params">
+                        <tr>
+                            <th>Parámetro</th>
+                            <th>Tipo</th>
+                            <th>Descripción</th>
+                        </tr>
+                        <tr>
+                            <td>entityName</td>
+                            <td>string</td>
+                            <td>Nombre de la entidad a gestionar</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <h3>Métodos Principales</h3>
+
+                <div class="method-doc">
+                    <div class="method-name"><span class="badge instance">Instance</span> loadEntity()</div>
+                    <div class="method-signature">loadEntity() → boolean</div>
+                    <div class="method-description">
+                        Carga la estructura, tests y TestSubmit de la entidad.
+                        Valida la existencia de: nombreentidad_estructura, nombreentidad_tests, nombreentidad_TestSubmit
+                    </div>
+                    <div class="method-returns">
+                        <strong>Retorna:</strong> <span class="return-type">true</span> si tuvo éxito
+                    </div>
+                </div>
+
+                <div class="method-doc">
+                    <div class="method-name"><span class="badge instance">Instance</span> validateStructure()</div>
+                    <div class="method-signature">validateStructure() → boolean</div>
+                    <div class="method-description">Valida que la estructura existe y es válida</div>
+                </div>
+
+                <div class="method-doc">
+                    <div class="method-name"><span class="badge instance">Instance</span> checkVariablesExistence()</div>
+                    <div class="method-signature">checkVariablesExistence() → Object</div>
+                    <div class="method-description">Verifica la existencia de todas las variables requeridas</div>
+                    <div class="method-returns">
+                        <strong>Retorna:</strong> {missing, errors}
+                    </div>
+                </div>
+
+                <div class="method-doc">
+                    <div class="method-name"><span class="badge instance">Instance</span> showTestForm()</div>
+                    <div class="method-signature">showTestForm()</div>
+                    <div class="method-description">Crea y muestra una instancia de TestForm</div>
+                </div>
+
+                <div class="method-doc">
+                    <div class="method-name"><span class="badge instance">Instance</span> showTestSubmit()</div>
+                    <div class="method-signature">showTestSubmit()</div>
+                    <div class="method-description">Crea y muestra una instancia de TestSubmit</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Workflows Section -->
+        <div class="api-section" id="workflows">
+            <h2>Workflows y Diagramas de Flujo</h2>
+
+            <h3>Workflow 1: TestForm - Verificación de Estructura y Ejecución de Pruebas</h3>
+            <div class="workflow-diagram">User selecciona entity
+        ↓
+   Gestor.loadEntity()
+        ↓
+   Valida estructura
+        ↓
+   User hace clic en "Verificar Tests"
+        ↓
+   new TestForm(name, structure)
+        ↓
+   testForm.analyze()
+        ├─→ analyzeStructure()
+        │   └─→ Verifica attributes
+        │
+        ├─→ analyzeTestDefinitions()
+        │   └─→ Carga def_tests_entity
+        │
+        ├─→ analyzeTestData()
+        │   └─→ Carga tests_fields_entity
+        │
+        └─→ executeAllTests()
+            └─→ Para cada test:
+                ├─ Crea campo temporal
+                ├─ Ejecuta validación
+                └─ Compara resultado esperado
+        ↓
+   displayResults()
+        ├─ Modal con resumen
+        └─ Botón "Ver Detalles"
+            ↓
+        showDetailedResults()
+            └─ Tabla completa de tests</div>
+
+            <h3>Workflow 2: TestSubmit - Verificación de Envío de Formulario</h3>
+            <div class="workflow-diagram">User selecciona entity
+        ↓
+   Gestor.loadEntity()
+        ↓
+   User hace clic en "Verificar Submit"
+        ↓
+   new TestSubmit(name, testSubmitData)
+        ↓
+   testSubmit.analyze()
+        ↓
+   analyzeAllActions()
+        ├─→ Para CREATE:
+        │   └─→ Valida todos los campos requeridos
+        │
+        ├─→ Para UPDATE/EDIT:
+        │   └─→ Valida ID + campos actualizables
+        │
+        ├─→ Para DELETE:
+        │   └─→ Valida solo ID
+        │
+        ├─→ Para READ:
+        │   └─→ Valida ID o criterio de búsqueda
+        │
+        └─→ Para SEARCH:
+            └─→ Valida criterios de búsqueda
+        ↓
+   displayResults()
+        ├─ Modal con resumen por acción
+        └─ Botón "Ver Detalles"
+            ↓
+        showDetailedResults()
+            └─ Tabla completa por acción</div>
+
+            <h3>Datos de estructura esperados</h3>
+            <p>La estructura de la entidad debe contener:</p>
+            <div class="code-block">nombreentidad_estructura = {
+  attributes: [
+    {
+      name: 'id_entity',
+      type: 'input',
+      validations: [
+        { rule: 'required' },
+        { rule: 'minSize', params: { size: 1 } },
+        { rule: 'maxSize', params: { size: 10 } }
+      ]
+    },
+    // ... más atributos
+  ]
+};</div>
+
+            <h3>Datos de pruebas esperados</h3>
+            <p>Las pruebas deben contener:</p>
+            <div class="code-block">def_tests_nombreentidad = [
+  { id: 1, name: 'Test 1', rule: 'required', params: {} },
+  { id: 2, name: 'Test 2', rule: 'minSize', params: { size: 1 } }
+  // ...
+];
+
+tests_fields_nombreentidad = [
+  { id: 1, value: '', error: true },    // Espera error
+  { id: 2, value: 'a', error: false },  // Espera éxito
+  // ...
+];</div>
+
+            <h3>Datos de submit esperados</h3>
+            <p>Los tests de submit deben contener:</p>
+            <div class="code-block">nombreentidad_TestSubmit = [
+  {
+    action: 'CREATE',
+    description: 'Crear entidad válida',
+    formData: { id: '1', name: 'test' },
+    expectError: false
+  },
+  {
+    action: 'UPDATE',
+    description: 'Actualizar sin ID',
+    formData: { name: 'test' },
+    expectError: true
+  }
+  // ...
+];</div>
+        </div>
+
+        <div class="footer-api">
+            <p>Sistema de Pruebas para Gestión de Entidades | Documentación Completa v1.0</p>
+            <p>Julio - Ana Alvarez Lopez | 2024</p>
+        </div>
+    </div>
+</body>
+</html>
