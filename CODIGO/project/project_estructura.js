@@ -122,22 +122,28 @@ window.project_estructura = {
             },
             db: {
                 is_null: {},
-                type: ['int']
+                type: ['string']
             },
             rules: {
                 validations: {
                     ADD: {
-                        exp_reg: '^[0-9]+$'
+                        min_size: 6,
+                        max_size: 60,
+                        exp_reg: '^[A-Za-zñÑáéíóúÁÉÍÓÚ ]+$'
                     },
                     EDIT: {
-                        exp_reg: '^[0-9]+$'
+                        min_size: 6,
+                        max_size: 60,
+                        exp_reg: '^[A-Za-zñÑáéíóúÁÉÍÓÚ ]+$'
                     },
                     SEARCH: {
-                        exp_reg: '^[0-9]+$'
+                        max_size: 60,
+                        exp_reg: '^[A-Za-zñÑáéíóúÁÉÍÓÚ ]+$'
                     }
                 }
             }
         },
+
         organization_project: {
             html: {
                 tag: 'input',
@@ -161,7 +167,8 @@ window.project_estructura = {
                         exp_reg: '^[a-zA-Z0-9\\s]+$'
                     },
                     SEARCH: {
-                        max_size: 120
+                        max_size: 120,
+                        exp_reg: '^[a-zA-Z0-9\\s]+$'
                     }
                 }
             }

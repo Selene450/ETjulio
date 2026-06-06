@@ -136,11 +136,11 @@ window.project_pruebas = [
   ['project', 'end_date_project', 26, 26, 'SEARCH', [{end_date_project: '30-12-2024'}], true],
  
   // ===== RESPONSABLE_PROJECT =====
-  ['project', 'responsable_project', 27, 27, 'ADD', [{responsable_project: '5'}], true],
+  ['project', 'responsable_project', 27, 27, 'ADD', [{responsable_project: 'Dr Fisher'}], true],
   ['project', 'responsable_project', 28, 28, 'ADD', [{responsable_project: ''}], 'responsable_required'],
-  ['project', 'responsable_project', 29, 29, 'ADD', [{responsable_project: 'abc'}], 'responsable_format_KO'],
-  ['project', 'responsable_project', 30, 30, 'EDIT', [{id_project: '789', responsable_project: '6'}], true],
-  ['project', 'responsable_project', 31, 31, 'SEARCH', [{responsable_project: '5'}], true],
+  ['project', 'responsable_project', 29, 29, 'ADD', [{responsable_project: '32004urbf'}], 'responsable_format_KO'],
+  ['project', 'responsable_project', 30, 30, 'EDIT', [{id_project: '789', responsable_project: 'Dr Fisher'}], true],
+  ['project', 'responsable_project', 31, 31, 'SEARCH', [{responsable_project: 'Dr Fisher'}], true],
  
   // ===== ORGANIZATION_PROJECT =====
   ['project', 'organization_project', 32, 32, 'ADD', [{organization_project: 'National Environment Agency'}], true],
