@@ -1,697 +1,564 @@
 /**
  * Clase TestForm
- * Verifica la estructura de la entidad, definiciones de test y ejecuta todas las validaciones
+ * Verifica la estructura de la entidad, definiciones de test y ejecuta pruebas de validación
  */
 class TestForm {
-    constructor(entityName, structure) {
+    constructor(entityName, gestor) {
         this.entityName = entityName;
-        this.structure = structure;
-        this.resultsWindow = null;
-        this.testDefinitions = null;
-        this.testData = null;
+        this.gestor = gestor;
+        this.estructura = gestor.getStructure();        // objeto _estructura
+        this.defTests = gestor.getDefTests();           // array _def_tests
+        this.pruebas = gestor.getTestsFields();         // array _pruebas / _tests_fields
+        this.entityClass = gestor.getEntityClass();     // instancia clase entidad (puede ser null)
     }
 
     /**
-     * Inicia el análisis completo de la entidad
+     * Abre una nueva ventana modal con todos los resultados del análisis
      */
-    analyze() {
-        const structureAnalysis = this.analyzeStructure();
-        if (!structureAnalysis.valid) {
-            this.showError('Error en la estructura', structureAnalysis.error);
-            return false;
-        }
-
+    showWindow() {
+        const structureAnalysis   = this.analyzeStructure();
         const definitionsAnalysis = this.analyzeTestDefinitions();
-        const dataAnalysis = this.analyzeTestData();
-        const executionResults = this.executeAllTests();
+        const dataAnalysis        = this.analyzeTestData();
+        const executionResults    = this.executeAllTests();
 
         this.displayResults({
-            structure: structureAnalysis,
+            structure:   structureAnalysis,
             definitions: definitionsAnalysis,
-            data: dataAnalysis,
-            execution: executionResults
+            data:        dataAnalysis,
+            execution:   executionResults
         });
+    }
+
+    // ─────────────────────────────────────────────────────
+    //  ANÁLISIS DE ESTRUCTURA
+    // ─────────────────────────────────────────────────────
+
+    analyzeStructure() {
+        const e = this.estructura;
+        if (!e || typeof e !== 'object') {
+            return { valid: false, error: 'Estructura no existe o no es un objeto' };
+        }
+        const attrs = e.attributes;
+        if (!attrs || typeof attrs !== 'object' || Array.isArray(attrs)) {
+            return { valid: false, error: 'attributes no es un objeto válido' };
+        }
+        const names = Object.keys(attrs);
+        if (names.length === 0) {
+            return { valid: false, error: 'No hay atributos definidos' };
+        }
+        return {
+            valid: true,
+            count: names.length,
+            attributes: names.join(', ')
+        };
+    }
+
+    // ─────────────────────────────────────────────────────
+    //  ANÁLISIS DE DEF_TESTS
+    //  Formato: [entity, field, htmlElement, id, description, action, expectedResult, errorMsg]
+    // ─────────────────────────────────────────────────────
+
+    analyzeTestDefinitions() {
+        const defs = this.defTests;
+        if (!Array.isArray(defs)) {
+            return { valid: false, count: 0, wellDefined: 0, error: 'def_tests no es un array' };
+        }
+
+        let wellDefined = 0;
+        const issues = [];
+        const byAttribute = {};
+
+        for (let i = 0; i < defs.length; i++) {
+            const d = defs[i];
+            if (!Array.isArray(d) || d.length < 7) {
+                issues.push(`Def ${i+1}: necesita al menos 7 campos`);
+                continue;
+            }
+            const [entity, field, htmlElem, id, description, action, expectedResult] = d;
+            // Validar tipos
+            if (typeof entity !== 'string' || typeof field !== 'string' ||
+                typeof htmlElem !== 'string' || typeof id !== 'number' ||
+                typeof description !== 'string' || typeof action !== 'string' ||
+                (expectedResult !== true && typeof expectedResult !== 'string')) {
+                issues.push(`Def ${i+1} (id:${id}): tipos incorrectos`);
+                continue;
+            }
+            wellDefined++;
+            byAttribute[field] = (byAttribute[field] || 0) + 1;
+        }
+
+        return {
+            valid: wellDefined === defs.length,
+            count: defs.length,
+            wellDefined,
+            byAttribute,
+            issues
+        };
+    }
+
+    // ─────────────────────────────────────────────────────
+    //  ANÁLISIS DE PRUEBAS (tests_fields / _pruebas)
+    //  Formato: [entity, field, defTestNum, pruebaNum, action, [{field:value,...}], expectedResult]
+    // ─────────────────────────────────────────────────────
+
+    analyzeTestData() {
+        const pruebas = this.pruebas;
+        if (!Array.isArray(pruebas)) {
+            return { valid: false, count: 0, wellTyped: 0, error: 'pruebas no es un array' };
+        }
+
+        let wellTyped = 0;
+        const issues = [];
+        let errorCount = 0;
+        let successCount = 0;
+        const byDefTest = {};
+
+        for (let i = 0; i < pruebas.length; i++) {
+            const p = pruebas[i];
+            if (!Array.isArray(p) || p.length < 7) {
+                issues.push(`Prueba ${i+1}: necesita 7 campos`);
+                continue;
+            }
+            const [entity, field, defTestNum, pruebaNum, action, values, expectedResult] = p;
+            if (typeof entity !== 'string' || typeof field !== 'string' ||
+                typeof defTestNum !== 'number' || typeof pruebaNum !== 'number' ||
+                typeof action !== 'string' || !Array.isArray(values) ||
+                (expectedResult !== true && typeof expectedResult !== 'string')) {
+                issues.push(`Prueba ${i+1}: tipos incorrectos`);
+                continue;
+            }
+            wellTyped++;
+            if (expectedResult === true) successCount++;
+            else errorCount++;
+            if (!byDefTest[defTestNum]) byDefTest[defTestNum] = { error: 0, success: 0 };
+            if (expectedResult === true) byDefTest[defTestNum].success++;
+            else byDefTest[defTestNum].error++;
+        }
+
+        return {
+            valid: wellTyped === pruebas.length,
+            count: pruebas.length,
+            wellTyped,
+            byType: { error: errorCount, success: successCount },
+            byDefTest,
+            issues
+        };
+    }
+
+    // ─────────────────────────────────────────────────────
+    //  EJECUCIÓN DE PRUEBAS
+    // ─────────────────────────────────────────────────────
+
+    executeAllTests() {
+        if (!Array.isArray(this.pruebas)) {
+            return { executed: 0, correct: 0, incorrect: 0, results: [] };
+        }
+        const results = [];
+        let correct = 0, incorrect = 0;
+        for (let i = 0; i < this.pruebas.length; i++) {
+            const r = this.executeIndividualTest(this.pruebas[i], i);
+            results.push(r);
+            if (r.passed) correct++; else incorrect++;
+        }
+        return { executed: this.pruebas.length, correct, incorrect, results };
+    }
+
+    /**
+     * Ejecuta una prueba individual.
+     * Prueba: [entity, field, defTestNum, pruebaNum, action, [{field:value,...}], expectedResult]
+     */
+    executeIndividualTest(prueba, index) {
+        try {
+            const [entity, fieldName, defTestNum, pruebaNum, action, valuesArr, expectedResult] = prueba;
+
+            // Localizar definición de test correspondiente (por número de def)
+            const defTest = Array.isArray(this.defTests)
+                ? this.defTests.find(d => Array.isArray(d) && d[3] === defTestNum)
+                : null;
+            const testDescription = defTest ? defTest[4] : `Prueba ${pruebaNum}`;
+
+            // Obtener definición del campo en la estructura
+            const fieldDef = this.estructura && this.estructura.attributes
+                ? this.estructura.attributes[fieldName]
+                : null;
+
+            if (!fieldDef) {
+                return {
+                    pruebaNum, defTestNum, testDescription, fieldName, action,
+                    passed: false,
+                    message: `Campo "${fieldName}" no encontrado en la estructura`
+                };
+            }
+
+            // Extraer valor de prueba: valuesArr es [{fieldName: value, mimeType?, size?}]
+            const testObj  = (Array.isArray(valuesArr) && valuesArr[0]) ? valuesArr[0] : {};
+            const rawValue = testObj[fieldName];   // puede ser null, '', string, number
+
+            // Determinar si el campo es de tipo file
+            const htmlTag  = fieldDef.html ? fieldDef.html.tag : 'input';
+            const htmlType = fieldDef.html ? fieldDef.html.type : 'text';
+            const isFile   = (htmlTag === 'file' || htmlType === 'file');
+
+            // Obtener validaciones de la estructura para este campo y acción
+            const validations = (fieldDef.rules && fieldDef.rules.validations && fieldDef.rules.validations[action])
+                ? fieldDef.rules.validations[action]
+                : {};
+
+            // Determinar si el campo es nullable en esta acción (is_null)
+            const isNullDef = fieldDef.db ? fieldDef.db.is_null : {};
+            const isNullable = isNullDef && typeof isNullDef === 'object' && isNullDef[action] === true;
+
+            let actualResult;
+
+            if (isFile) {
+                actualResult = this.validateFileValue(rawValue, testObj, validations, isNullable, action);
+            } else {
+                actualResult = this.validateTextValue(fieldName, rawValue, validations, isNullable, index, htmlTag, action);
+            }
+
+            // Comparar: expectedResult===true -> esperamos sin error; string -> esperamos error
+            const expectedError = expectedResult !== true;
+            const gotError      = actualResult !== true;
+            const passed        = expectedError === gotError;
+
+            return {
+                pruebaNum, defTestNum, testDescription, fieldName, action,
+                testValue: rawValue,
+                expectedResult, actualResult,
+                passed,
+                message: actualResult !== true ? String(actualResult) : 'OK'
+            };
+        } catch (err) {
+            return {
+                pruebaNum: prueba[3] || (index + 1),
+                passed: false,
+                message: `Excepción: ${err.message}`
+            };
+        }
+    }
+
+    // ─────────────────────────────────────────────────────
+    //  VALIDACIÓN DE CAMPOS TEXTO / NUMBER / DATE / SELECT
+    // ─────────────────────────────────────────────────────
+
+    validateTextValue(fieldName, rawValue, validations, isNullable, index, htmlTag, action) {
+        // Construir elemento temporal en el DOM
+        const elementId = `__tf_${index}`;
+        let container = document.getElementById('__tf_container__');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = '__tf_container__';
+            container.style.display = 'none';
+            document.body.appendChild(container);
+        }
+
+        const value = (rawValue === null || rawValue === undefined) ? '' : String(rawValue);
+
+        if (htmlTag === 'textarea') {
+            container.innerHTML = `<textarea id="${elementId}">${value}</textarea>`;
+        } else if (htmlTag === 'select') {
+            const opts = (this.estructura && this.estructura.attributes) ? [] : [];
+            container.innerHTML = `<select id="${elementId}"><option value="${value}">${value}</option></select>`;
+            const sel = document.getElementById(elementId);
+            if (sel) sel.value = value;
+        } else {
+            const safe = value.replace(/"/g, '&quot;');
+            container.innerHTML = `<input id="${elementId}" value="${safe}">`;
+        }
+
+        const result = this.runValidations(elementId, validations, isNullable, rawValue, action, fieldName);
+        container.innerHTML = '';
+        return result;
+    }
+
+    /**
+     * Ejecuta todas las validaciones definidas en la estructura sobre un elementId del DOM
+     */
+    runValidations(elementId, validations, isNullable, rawValue, action, fieldName) {
+        // 1. required: campo NOT NULL y acción es ADD o EDIT (en SEARCH no se exige rellenar)
+        const requireCheck = !isNullable && (action === 'ADD' || action === 'EDIT');
+        if (requireCheck) {
+            const r = Validations.isRequired(elementId);
+            if (r !== true) return r;
+        }
+
+        // Si vacío y nullable, no seguir validando formato/tamaño
+        const element = document.getElementById(elementId);
+        if (!element) return true;
+        const val = element.value !== undefined ? element.value.trim() : '';
+        if (val === '') return true;
+
+        // 2. integer (dígitos)
+        if (validations.integer) {
+            const r = Validations.isInteger(elementId);
+            if (r !== true) return r;
+        }
+
+        // 3. min_size
+        if (validations.min_size !== undefined) {
+            const r = Validations.hasMinSize(elementId, validations.min_size);
+            if (r !== true) return r;
+        }
+
+        // 4. max_size
+        if (validations.max_size !== undefined) {
+            const r = Validations.hasMaxSize(elementId, validations.max_size);
+            if (r !== true) return r;
+        }
+
+        // 5. exp_reg
+        if (validations.exp_reg) {
+            try {
+                const regex = new RegExp(validations.exp_reg);
+                if (!regex.test(val)) return 'Formato no válido';
+            } catch (e) {
+                return `Expresión regular inválida: ${e.message}`;
+            }
+        }
+
+        // 6. valid_date
+        if (validations.valid_date) {
+            const r = Validations.isValidDate(elementId);
+            if (r !== true) return r;
+        }
+
+        // 7. personalized
+        if (validations.personalized && this.entityClass && fieldName) {
+            const method = `${fieldName}_personalized_validation`;
+            if (typeof this.entityClass[method] === 'function') {
+                try {
+                    return this.entityClass[method](val);
+                } catch (e) {
+                    return `Error validación personalizada: ${e.message}`;
+                }
+            }
+        }
 
         return true;
     }
 
-    /**
-     * Analiza la estructura de la entidad
-     * @returns {Object} Resultado del análisis
-     */
-    analyzeStructure() {
-        if (!this.structure || typeof this.structure !== 'object') {
-            return {
-                valid: false,
-                error: 'La estructura no existe o no es válida'
-            };
+    // ─────────────────────────────────────────────────────
+    //  VALIDACIÓN DE CAMPOS FILE
+    //  rawValue: nombre del fichero (string) o null
+    //  testObj: {fieldName: 'nombre.pdf', mimeType: '...', size: 12345}
+    // ─────────────────────────────────────────────────────
+
+    validateFileValue(rawValue, testObj, validations, isNullable, action) {
+        // Comprobar no_file (campo vacío / fichero no seleccionado)
+        if (rawValue === null || rawValue === undefined) {
+            const fileRequired = validations.no_file || (!isNullable && (action === 'ADD' || action === 'EDIT'));
+            if (fileRequired) {
+                return 'No se ha seleccionado ningún fichero';
+            }
+            return true;
         }
 
-        const attributes = this.structure.attributes;
-        if (!attributes || typeof attributes !== 'object' || Array.isArray(attributes)) {
-            return {
-                valid: false,
-                error: 'No se encontraron atributos válidos en la estructura'
-            };
-        }
+        const fileName = String(rawValue);
+        const mimeType = testObj.mimeType;
+        const size     = testObj.size;
 
-        const attributeNames = Object.keys(attributes);
-        if (attributeNames.length === 0) {
-            return {
-                valid: false,
-                error: 'No se encontraron atributos en la estructura'
-            };
-        }
-
-        const attributeList = attributeNames.join(', ');
-        const attributeDetails = attributeNames.map(name => ({
-            name: name,
-            ...attributes[name]
-        }));
-
-        return {
-            valid: true,
-            count: attributeNames.length,
-            attributes: attributeList,
-            attributeDetails: attributeDetails
-        };
-    }
-
-    /**
-     * Analiza las definiciones de test
-     * @returns {Object} Resultado del análisis
-     */
-    analyzeTestDefinitions() {
-        try {
-            const globalVarName = `${this.entityName}_def_tests`;
-            const testDefinitions = window[globalVarName];
-
-            if (!testDefinitions) {
-                return {
-                    valid: false,
-                    count: 0,
-                    wellDefined: 0,
-                    error: `Variable ${globalVarName} no encontrada`
-                };
-            }
-
-            if (!Array.isArray(testDefinitions)) {
-                return {
-                    valid: false,
-                    count: 0,
-                    wellDefined: 0,
-                    error: `${globalVarName} no es un array`
-                };
-            }
-
-            let wellDefinedCount = 0;
-            const issues = [];
-
-            for (let i = 0; i < testDefinitions.length; i++) {
-                const def = testDefinitions[i];
-                
-                // Validar formato de array: [entity, field, type, id, description, action, expectedResult, errorMessage]
-                if (!Array.isArray(def) || def.length < 7) {
-                    issues.push(`Test ${i + 1}: Formato inválido`);
-                    continue;
-                }
-                
-                const [entity, field, type, id, description, action, expectedResult] = def;
-                
-                if (!entity || !field || !type || id === undefined || !description || !action || expectedResult === undefined) {
-                    issues.push(`Test ${i + 1}: Falta algún campo requerido`);
-                    continue;
-                }
-
-                wellDefinedCount++;
-            }
-
-            this.testDefinitions = testDefinitions;
-
-            return {
-                valid: wellDefinedCount === testDefinitions.length,
-                count: testDefinitions.length,
-                wellDefined: wellDefinedCount,
-                issues: issues
-            };
-        } catch (error) {
-            return {
-                valid: false,
-                count: 0,
-                wellDefined: 0,
-                error: `Error analysing definitions: ${error.message}`
-            };
-        }
-    }
-
-    /**
-     * Analiza los datos de test
-     * @returns {Object} Resultado del análisis
-     */
-    analyzeTestData() {
-        try {
-            const globalVarName = `${this.entityName}_tests_fields`;
-            const testData = window[globalVarName];
-
-            if (!testData) {
-                return {
-                    valid: false,
-                    count: 0,
-                    wellTyped: 0,
-                    error: `Variable ${globalVarName} no encontrada`
-                };
-            }
-
-            if (!Array.isArray(testData)) {
-                return {
-                    valid: false,
-                    count: 0,
-                    wellTyped: 0,
-                    error: `${globalVarName} no es un array`
-                };
-            }
-
-            let wellTypedCount = 0;
-            const typeIssues = [];
-
-            for (let i = 0; i < testData.length; i++) {
-                const test = testData[i];
-                
-                // Validar formato de array: [entity, field, type, id, description, action, expectedResult, errorMessage]
-                if (!Array.isArray(test) || test.length < 7) {
-                    typeIssues.push(`Test ${i + 1}: Formato inválido`);
-                    continue;
-                }
-
-                const [entity, field, type, id, description, action, expectedResult, errorMessage] = test;
-                
-                // Validar que los campos requeridos tengan valores
-                if (id === undefined || !field) {
-                    typeIssues.push(`Test ${i + 1}: Falta id o field`);
-                    continue;
-                }
-
-                wellTypedCount++;
-            }
-
-            this.testData = testData;
-
-            return {
-                valid: wellTypedCount === testData.length,
-                count: testData.length,
-                wellTyped: wellTypedCount,
-                byType: this.countTestsByType(testData),
-                issues: typeIssues
-            };
-        } catch (error) {
-            return {
-                valid: false,
-                count: 0,
-                wellTyped: 0,
-                error: `Error analysing data: ${error.message}`
-            };
-        }
-    }
-
-    /**
-     * Cuenta los tests por tipo (error/success)
-     * @private
-     */
-    countTestsByType(testData) {
-        let errorCount = 0;
-        let successCount = 0;
-
-        for (const test of testData) {
-            if (test.error === true) {
-                errorCount++;
-            } else {
-                successCount++;
+        // type_file: [{type_file: 'application/pdf'}, ...]
+        if (validations.type_file && Array.isArray(validations.type_file)) {
+            const allowed = validations.type_file.map(t => t.type_file);
+            if (mimeType && !allowed.includes(mimeType)) {
+                return `Tipo de fichero no permitido: ${mimeType}`;
             }
         }
 
-        return {
-            error: errorCount,
-            success: successCount,
-            total: testData.length
-        };
-    }
-
-    /**
-     * Ejecuta todos los tests para verificar que funcionan correctamente
-     * @returns {Object} Resultado de la ejecución
-     */
-    executeAllTests() {
-        if (!this.testData || !Array.isArray(this.testData)) {
-            return {
-                executed: 0,
-                correct: 0,
-                incorrect: 0,
-                results: []
-            };
-        }
-
-        const results = [];
-        let correctedCount = 0;
-        let incorrectCount = 0;
-
-        for (let i = 0; i < this.testData.length; i++) {
-            const test = this.testData[i];
-            const result = this.executeIndividualTest(test, i);
-            
-            results.push(result);
-
-            if (result.passed) {
-                correctedCount++;
-            } else {
-                incorrectCount++;
+        // max_size_file: [{max_size_file: 2000000}, ...]
+        if (validations.max_size_file && Array.isArray(validations.max_size_file)) {
+            const maxBytes = validations.max_size_file[0].max_size_file;
+            if (size !== undefined && size > maxBytes) {
+                return `El fichero supera el tamaño máximo de ${maxBytes} bytes`;
             }
         }
 
-        return {
-            executed: this.testData.length,
-            correct: correctedCount,
-            incorrect: incorrectCount,
-            results: results
-        };
-    }
-
-    /**
-     * Ejecuta una prueba individual
-     * @private
-     */
-    executeIndividualTest(test, index) {
-        try {
-            // Desestructurar el array: [entity, field, type, id, description, action, expectedResult, errorMessage]
-            const [entity, field, type, id, description, action, expectedResult, errorMessage] = test;
-            
-            const testDef = this.testDefinitions[id - 1];
-            
-            if (!testDef) {
-                return {
-                    testNumber: index + 1,
-                    testId: id,
-                    passed: false,
-                    message: 'Definición de test no encontrada'
-                };
-            }
-
-            // Crear elemento temporal para validación
-            const tempElement = document.createElement('div');
-            tempElement.id = `temp_test_${index}`;
-            tempElement.style.display = 'none';
-            tempElement.innerHTML = `<input id="field_${index}" value="${expectedResult || ''}">`;
-            document.body.appendChild(tempElement);
-
-            // Ejecutar validación según el tipo
-            let validationResult = true;
-            let message = '';
-
+        // format_name_file: [{format_name_file: 'regexp'}, ...]
+        if (validations.format_name_file && Array.isArray(validations.format_name_file)) {
+            const pattern = validations.format_name_file[0].format_name_file;
             try {
-                validationResult = this.runValidation(testDef, `field_${index}`);
-                message = validationResult === true ? 'Validación pasada' : validationResult;
-            } catch (error) {
-                message = `Error: ${error.message}`;
-            }
-
-            // Verificar si el resultado es el esperado (true = sin error, string = con error esperado)
-            const shouldHaveError = typeof expectedResult === 'string';
-            const hasError = validationResult !== true;
-            const passed = shouldHaveError === hasError;
-
-            // Limpiar elemento temporal
-            document.body.removeChild(tempElement);
-
-            return {
-                testNumber: index + 1,
-                testId: id,
-                testName: description,
-                value: expectedResult,
-                shouldHaveError: shouldHaveError,
-                hasError: hasError,
-                passed: passed,
-                message: message
-            };
-        } catch (error) {
-            return {
-                testNumber: index + 1,
-                passed: false,
-                message: `Excepción: ${error.message}`
-            };
+                if (!new RegExp(pattern).test(fileName)) {
+                    return `Nombre de fichero con formato incorrecto`;
+                }
+            } catch (e) { /* ignore bad regex */ }
         }
+
+        // min_size / max_size sobre el nombre del fichero
+        if (validations.min_size !== undefined && fileName.length < validations.min_size) {
+            return `Nombre de fichero demasiado corto (mínimo ${validations.min_size})`;
+        }
+        if (validations.max_size !== undefined && fileName.length > validations.max_size) {
+            return `Nombre de fichero demasiado largo (máximo ${validations.max_size})`;
+        }
+
+        return true;
     }
 
-    /**
-     * Ejecuta una validación individual
-     * @private
-     */
-    runValidation(testDef, elementId) {
-        const rule = testDef.rule;
-        const params = testDef.params || {};
+    // ─────────────────────────────────────────────────────
+    //  PRESENTACIÓN DE RESULTADOS
+    // ─────────────────────────────────────────────────────
 
-        switch (rule) {
-            case 'required':
-                return Validations.isRequired(elementId);
-            case 'integer':
-                return Validations.isInteger(elementId);
-            case 'minSize':
-                return Validations.hasMinSize(elementId, params.size);
-            case 'maxSize':
-                return Validations.hasMaxSize(elementId, params.size);
-            default:
-                return true;
-        }
-    }
+    displayResults(results) {
+        const modal = this.buildModal(`Verificación de Tests — ${this.entityName}`);
+        const content = modal.querySelector('.modal-content');
 
-    /**
-     * Muestra los resultados en una ventana modal
-     * @param {Object} analysisResults - Resultados del análisis
-     */
-    displayResults(analysisResults) {
-        const modal = this.createResultsModal(analysisResults);
+        content.appendChild(this.buildStructureSection(results.structure));
+        content.appendChild(this.buildDefinitionsSection(results.definitions));
+        content.appendChild(this.buildDataSection(results.data));
+        content.appendChild(this.buildExecutionSection(results.execution));
+        content.appendChild(this.buildDetailButton(results.execution));
+
         document.body.appendChild(modal);
     }
 
-    /**
-     * Crea el modal de resultados
-     * @private
-     */
-    createResultsModal(results) {
+    buildModal(titleText) {
         const modal = document.createElement('div');
         modal.className = 'modal';
         modal.style.display = 'flex';
 
         const content = document.createElement('div');
         content.className = 'modal-content';
-        content.style.maxHeight = '90vh';
-        content.style.overflow = 'auto';
+        content.style.cssText = 'max-height:90vh;overflow-x:auto;overflow-y:auto;min-width:600px;max-width:95vw;';
 
-        // Encabezado
         const header = document.createElement('div');
         header.className = 'modal-header';
-        const title = document.createElement('h2');
-        title.textContent = `Verificación de Tests - ${this.entityName}`;
+        header.innerHTML = `<h2>${titleText}</h2>`;
         const closeBtn = document.createElement('span');
         closeBtn.className = 'close-btn';
         closeBtn.innerHTML = '&times;';
         closeBtn.style.cursor = 'pointer';
         closeBtn.onclick = () => modal.remove();
-
-        header.appendChild(title);
         header.appendChild(closeBtn);
         content.appendChild(header);
-
-        // Análisis de estructura
-        content.appendChild(this.createStructureSection(results.structure));
-
-        // Análisis de definiciones
-        content.appendChild(this.createDefinitionsSection(results.definitions));
-
-        // Análisis de datos
-        content.appendChild(this.createDataSection(results.data));
-
-        // Resultados de ejecución
-        content.appendChild(this.createExecutionSection(results.execution));
-
-        // Botones de acción
-        content.appendChild(this.createActionButtons(results.execution));
-
         modal.appendChild(content);
         return modal;
     }
 
-    /**
-     * Crea sección de estructura
-     * @private
-     */
-    createStructureSection(structure) {
-        const section = document.createElement('div');
-        section.className = 'modal-section';
-        section.style.padding = '15px';
-        section.style.borderBottom = '1px solid #e0e0e0';
+    buildSection(title) {
+        const s = document.createElement('div');
+        s.className = 'modal-section';
+        s.style.cssText = 'padding:15px;border-bottom:1px solid #e0e0e0;';
+        s.innerHTML = `<h3>${title}</h3>`;
+        return s;
+    }
 
-        const title = document.createElement('h3');
-        title.textContent = 'Estructura de la Entidad';
-        section.appendChild(title);
-
-        if (!structure.valid) {
-            const error = document.createElement('p');
-            error.style.color = '#f44336';
-            error.textContent = structure.error;
-            section.appendChild(error);
+    buildStructureSection(s) {
+        const sec = this.buildSection('Estructura de la Entidad');
+        if (!s.valid) {
+            sec.innerHTML += `<p style="color:#f44336;">❌ ${s.error}</p>`;
         } else {
-            const info = document.createElement('div');
-            info.style.fontSize = '14px';
-            info.innerHTML = `
-                <p><strong>Total de atributos:</strong> ${structure.count}</p>
-                <p><strong>Atributos:</strong> ${structure.attributes}</p>
-            `;
-            section.appendChild(info);
+            sec.innerHTML += `
+                <p>✅ <strong>Estado:</strong> Correcta</p>
+                <p><strong>Total atributos:</strong> ${s.count}</p>
+                <p><strong>Atributos:</strong> ${s.attributes}</p>`;
         }
-
-        return section;
+        return sec;
     }
 
-    /**
-     * Crea sección de definiciones
-     * @private
-     */
-    createDefinitionsSection(definitions) {
-        const section = document.createElement('div');
-        section.className = 'modal-section';
-        section.style.padding = '15px';
-        section.style.borderBottom = '1px solid #e0e0e0';
-
-        const title = document.createElement('h3');
-        title.textContent = 'Definiciones de Test';
-        section.appendChild(title);
-
-        if (definitions.error) {
-            const error = document.createElement('p');
-            error.style.color = '#f44336';
-            error.textContent = definitions.error;
-            section.appendChild(error);
+    buildDefinitionsSection(d) {
+        const sec = this.buildSection('Definiciones de Test (def_tests)');
+        if (d.error) {
+            sec.innerHTML += `<p style="color:#f44336;">❌ ${d.error}</p>`;
         } else {
-            const info = document.createElement('div');
-            info.style.fontSize = '14px';
-            info.innerHTML = `
-                <p><strong>Total de definiciones:</strong> ${definitions.count}</p>
-                <p><strong>Bien definidas:</strong> ${definitions.wellDefined}</p>
-                ${definitions.issues.length > 0 ? `
-                    <p><strong style="color: #ff9800;">Problemas encontrados:</strong></p>
-                    <ul style="margin: 5px 0; padding-left: 20px;">
-                        ${definitions.issues.map(issue => `<li>${issue}</li>`).join('')}
-                    </ul>
-                ` : ''}
-            `;
-            section.appendChild(info);
+            const byAttr = Object.entries(d.byAttribute || {})
+                .map(([k, v]) => `<li>${k}: ${v}</li>`).join('');
+            sec.innerHTML += `
+                <p><strong>Total definiciones:</strong> ${d.count}</p>
+                <p><strong>Bien definidas:</strong> ${d.wellDefined} / ${d.count}</p>
+                ${byAttr ? `<p><strong>Por atributo:</strong></p><ul style="padding-left:20px">${byAttr}</ul>` : ''}
+                ${d.issues && d.issues.length ? `<p style="color:#ff9800;">Problemas: ${d.issues.join(' | ')}</p>` : ''}`;
         }
-
-        return section;
+        return sec;
     }
 
-    /**
-     * Crea sección de datos
-     * @private
-     */
-    createDataSection(data) {
-        const section = document.createElement('div');
-        section.className = 'modal-section';
-        section.style.padding = '15px';
-        section.style.borderBottom = '1px solid #e0e0e0';
-
-        const title = document.createElement('h3');
-        title.textContent = 'Datos de Test';
-        section.appendChild(title);
-
-        if (data.error) {
-            const error = document.createElement('p');
-            error.style.color = '#f44336';
-            error.textContent = data.error;
-            section.appendChild(error);
+    buildDataSection(d) {
+        const sec = this.buildSection('Pruebas (pruebas / tests_fields)');
+        if (d.error) {
+            sec.innerHTML += `<p style="color:#f44336;">❌ ${d.error}</p>`;
         } else {
-            const info = document.createElement('div');
-            info.style.fontSize = '14px';
-            info.innerHTML = `
-                <p><strong>Total de pruebas:</strong> ${data.count}</p>
-                <p><strong>Bien tipificadas:</strong> ${data.wellTyped}</p>
-                <p><strong>Pruebas de error:</strong> ${data.byType.error}</p>
-                <p><strong>Pruebas de éxito:</strong> ${data.byType.success}</p>
-                ${data.issues.length > 0 ? `
-                    <p><strong style="color: #ff9800;">Problemas encontrados:</strong></p>
-                    <ul style="margin: 5px 0; padding-left: 20px;">
-                        ${data.issues.map(issue => `<li>${issue}</li>`).join('')}
-                    </ul>
-                ` : ''}
-            `;
-            section.appendChild(info);
+            sec.innerHTML += `
+                <p><strong>Total pruebas:</strong> ${d.count}</p>
+                <p><strong>Bien tipificadas:</strong> ${d.wellTyped} / ${d.count}</p>
+                <p><strong>Prueban error:</strong> ${d.byType.error}</p>
+                <p><strong>Prueban éxito:</strong> ${d.byType.success}</p>
+                ${d.issues && d.issues.length ? `<p style="color:#ff9800;">Problemas: ${d.issues.join(' | ')}</p>` : ''}`;
         }
-
-        return section;
+        return sec;
     }
 
-    /**
-     * Crea sección de resultados de ejecución
-     * @private
-     */
-    createExecutionSection(execution) {
-        const section = document.createElement('div');
-        section.className = 'modal-section';
-        section.style.padding = '15px';
-        section.style.borderBottom = '1px solid #e0e0e0';
-
-        const title = document.createElement('h3');
-        title.textContent = 'Resultados de Ejecución de Tests';
-        section.appendChild(title);
-
-        const summary = document.createElement('div');
-        summary.style.fontSize = '14px';
-        summary.style.marginBottom = '15px';
-        summary.innerHTML = `
-            <p><strong>Pruebas ejecutadas:</strong> ${execution.executed}</p>
-            <p style="color: #4caf50;"><strong>Correctas:</strong> ${execution.correct}</p>
-            <p style="color: #f44336;"><strong>Incorrectas:</strong> ${execution.incorrect}</p>
-        `;
-        section.appendChild(summary);
-
-        return section;
+    buildExecutionSection(e) {
+        const pct = e.executed ? Math.round(e.correct / e.executed * 100) : 0;
+        const sec = this.buildSection('Resultados de Ejecución');
+        sec.innerHTML += `
+            <p><strong>Pruebas ejecutadas:</strong> ${e.executed}</p>
+            <p style="color:#4caf50;"><strong>Correctas:</strong> ${e.correct}</p>
+            <p style="color:#f44336;"><strong>Incorrectas:</strong> ${e.incorrect}</p>
+            <p><strong>Porcentaje de éxito:</strong> ${pct}%</p>`;
+        return sec;
     }
 
-    /**
-     * Crea botones de acciones
-     * @private
-     */
-    createActionButtons(execution) {
-        const section = document.createElement('div');
-        section.style.padding = '15px';
-        section.style.textAlign = 'center';
-        section.style.backgroundColor = '#f5f5f5';
-
-        const button = document.createElement('button');
-        button.textContent = 'Ver Detalles de cada Prueba';
-        button.style.padding = '10px 20px';
-        button.style.backgroundColor = '#667eea';
-        button.style.color = 'white';
-        button.style.border = 'none';
-        button.style.borderRadius = '4px';
-        button.style.cursor = 'pointer';
-        button.style.fontSize = '14px';
-
-        button.onclick = () => {
-            this.showDetailedResults(execution.results);
-        };
-
-        section.appendChild(button);
-        return section;
+    buildDetailButton(execution) {
+        const sec = document.createElement('div');
+        sec.style.cssText = 'padding:15px;text-align:center;background:#f5f5f5;';
+        const btn = document.createElement('button');
+        btn.textContent = 'Ver Detalles de cada Prueba';
+        btn.style.cssText = 'padding:10px 20px;background:#667eea;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px;';
+        btn.onclick = () => this.showDetailedResults(execution.results);
+        sec.appendChild(btn);
+        return sec;
     }
 
-    /**
-     * Muestra resultados detallados de cada prueba
-     */
     showDetailedResults(results) {
-        const modal = document.createElement('div');
-        modal.className = 'modal';
-        modal.style.display = 'flex';
+        const modal = this.buildModal(`Detalle de Pruebas — ${this.entityName}`);
+        const content = modal.querySelector('.modal-content');
+        content.style.minWidth = '750px';
 
-        const content = document.createElement('div');
-        content.className = 'modal-content';
-        content.style.maxHeight = '90vh';
-        content.style.overflow = 'auto';
-
-        // Encabezado
-        const header = document.createElement('div');
-        header.className = 'modal-header';
-        const title = document.createElement('h2');
-        title.textContent = 'Detalles de Pruebas';
-        const closeBtn = document.createElement('span');
-        closeBtn.className = 'close-btn';
-        closeBtn.innerHTML = '&times;';
-        closeBtn.style.cursor = 'pointer';
-        closeBtn.onclick = () => modal.remove();
-
-        header.appendChild(title);
-        header.appendChild(closeBtn);
-        content.appendChild(header);
-
-        // Resultados en tabla
         const table = document.createElement('table');
-        table.style.width = '100%';
-        table.style.borderCollapse = 'collapse';
-        table.style.fontSize = '13px';
-        table.style.margin = '15px';
-
-        const thead = document.createElement('thead');
-        thead.innerHTML = `
-            <tr style="background-color: #f5f5f5; border-bottom: 2px solid #ddd;">
-                <th style="padding: 10px; text-align: left;">#</th>
-                <th style="padding: 10px; text-align: left;">Nombre del Test</th>
-                <th style="padding: 10px; text-align: left;">Valor</th>
-                <th style="padding: 10px; text-align: center;">Esperado</th>
-                <th style="padding: 10px; text-align: center;">Obtenido</th>
-                <th style="padding: 10px; text-align: center;">Estado</th>
-            </tr>
-        `;
-        table.appendChild(thead);
-
+        table.style.cssText = 'width:100%;border-collapse:collapse;font-size:13px;margin:15px;';
+        table.innerHTML = `
+            <thead>
+                <tr style="background:#f5f5f5;border-bottom:2px solid #ddd;">
+                    <th style="padding:8px;">#</th>
+                    <th style="padding:8px;text-align:left;">Campo</th>
+                    <th style="padding:8px;text-align:left;">Descripción</th>
+                    <th style="padding:8px;">Acción</th>
+                    <th style="padding:8px;">Esperado</th>
+                    <th style="padding:8px;">Obtenido</th>
+                    <th style="padding:8px;">Estado</th>
+                </tr>
+            </thead>`;
         const tbody = document.createElement('tbody');
-        for (const result of results) {
+        for (const r of results) {
             const row = document.createElement('tr');
             row.style.borderBottom = '1px solid #e0e0e0';
-            
-            const statusColor = result.passed ? '#4caf50' : '#f44336';
-            const statusText = result.passed ? '✓' : '✗';
-
+            if (!r.passed) row.style.backgroundColor = '#fff3f3';
+            const color  = r.passed ? '#4caf50' : '#f44336';
+            const status = r.passed ? '✓ OK' : '✗ FALLO';
+            const expected = r.expectedResult === true ? 'Éxito' : `Error (${r.expectedResult})`;
+            const obtained = r.actualResult  === true ? 'Éxito' : `Error: ${r.message}`;
             row.innerHTML = `
-                <td style="padding: 10px;">${result.testNumber}</td>
-                <td style="padding: 10px;">${result.testName || 'N/A'}</td>
-                <td style="padding: 10px;">${result.value || 'vacío'}</td>
-                <td style="padding: 10px; text-align: center;">${result.expectedError ? 'Error' : 'Éxito'}</td>
-                <td style="padding: 10px; text-align: center;">${result.gotError ? 'Error' : 'Éxito'}</td>
-                <td style="padding: 10px; text-align: center; color: ${statusColor}; font-weight: bold;">${statusText}</td>
-            `;
+                <td style="padding:8px;text-align:center;">${r.pruebaNum ?? ''}</td>
+                <td style="padding:8px;font-family:monospace;font-size:11px;">${r.fieldName ?? ''}</td>
+                <td style="padding:8px;">${r.testDescription ?? ''}</td>
+                <td style="padding:8px;text-align:center;">${r.action ?? ''}</td>
+                <td style="padding:8px;text-align:center;">${expected}</td>
+                <td style="padding:8px;">${obtained}</td>
+                <td style="padding:8px;text-align:center;color:${color};font-weight:bold;">${status}</td>`;
             tbody.appendChild(row);
         }
         table.appendChild(tbody);
-
         content.appendChild(table);
-        modal.appendChild(content);
         document.body.appendChild(modal);
     }
 
-    /**
-     * Muestra un error
-     * @private
-     */
     showError(title, message) {
-        const modal = document.createElement('div');
-        modal.className = 'modal';
-        modal.style.display = 'flex';
-
-        const content = document.createElement('div');
-        content.className = 'modal-content';
-
-        const header = document.createElement('div');
-        header.className = 'modal-header';
-        header.style.backgroundColor = '#f44336';
-        const titleEl = document.createElement('h2');
-        titleEl.textContent = title;
-        titleEl.style.color = 'white';
-        const closeBtn = document.createElement('span');
-        closeBtn.className = 'close-btn';
-        closeBtn.innerHTML = '&times;';
-        closeBtn.style.cursor = 'pointer';
-        closeBtn.style.color = 'white';
-        closeBtn.onclick = () => modal.remove();
-
-        header.appendChild(titleEl);
-        header.appendChild(closeBtn);
-        content.appendChild(header);
-
+        const modal = this.buildModal(title);
+        const content = modal.querySelector('.modal-content');
+        content.querySelector('.modal-header').style.backgroundColor = '#f44336';
         const body = document.createElement('div');
         body.style.padding = '20px';
         body.textContent = message;
         content.appendChild(body);
-
-        modal.appendChild(content);
         document.body.appendChild(modal);
     }
 }

@@ -1,465 +1,366 @@
 /**
  * Clase TestSubmit
- * Verifica la validación y envío de formularios para cada acción (CREATE, UPDATE, EDIT, DELETE, READ)
+ * Verifica la validación de submit de formularios para cada acción (ADD, EDIT, SEARCH, etc.)
  */
 class TestSubmit {
-    constructor(entityName, testSubmitData) {
+    constructor(entityName, gestor) {
         this.entityName = entityName;
-        this.testSubmitData = testSubmitData;
-        this.resultsWindow = null;
+        this.gestor = gestor;
+        this.estructura = gestor.getStructure();
+        // Formato: [entity, action, num, description, {fields...}, expectedResult]
+        this.testSubmitData = gestor.getTestSubmit();
     }
 
     /**
-     * Inicia el análisis de pruebas de submit
+     * Abre ventana modal con resultados de pruebas de submit
      */
-    analyze() {
-        if (!this.testSubmitData) {
+    showWindow() {
+        if (!this.testSubmitData || !Array.isArray(this.testSubmitData) || this.testSubmitData.length === 0) {
             this.showError('Error', `No se encontraron pruebas de submit para ${this.entityName}`);
-            return false;
+            return;
         }
 
         const analyses = this.analyzeAllActions();
         this.displayResults(analyses);
-        return true;
     }
 
+    // ─────────────────────────────────────────────────────
+    //  ANÁLISIS POR ACCIÓN
+    // ─────────────────────────────────────────────────────
+
     /**
-     * Analiza todas las acciones (CREATE, UPDATE, EDIT, DELETE, READ)
-     * @returns {Object} Análisis para cada acción
+     * Agrupa y analiza pruebas por acción (campo [1] del array)
      */
     analyzeAllActions() {
-        const actions = ['CREATE', 'UPDATE', 'EDIT', 'DELETE', 'READ'];
-        const analyses = {};
-
-        for (const action of actions) {
-            analyses[action] = this.analyzeAction(action);
+        const actionsSet = new Set();
+        for (const t of this.testSubmitData) {
+            if (Array.isArray(t) && typeof t[1] === 'string') actionsSet.add(t[1]);
         }
 
+        const analyses = {};
+        for (const action of actionsSet) {
+            analyses[action] = this.analyzeAction(action);
+        }
         return analyses;
     }
 
-    /**
-     * Analiza una acción específica
-     * @private
-     */
     analyzeAction(action) {
-        // Buscar tests para esta acción
-        const actionTests = this.findTestsForAction(action);
-
-        if (!actionTests || actionTests.length === 0) {
-            return {
-                action: action,
-                found: false,
-                count: 0,
-                correct: 0,
-                incorrect: 0,
-                results: []
-            };
-        }
-
-        // Ejecutar cada test
-        let correctCount = 0;
-        let incorrectCount = 0;
+        const actionTests = this.testSubmitData.filter(t => Array.isArray(t) && t[1] === action);
+        let correct = 0, incorrect = 0;
         const results = [];
 
         for (let i = 0; i < actionTests.length; i++) {
-            const test = actionTests[i];
-            const result = this.executeSubmitTest(action, test, i);
-            results.push(result);
-
-            if (result.correct) {
-                correctCount++;
-            } else {
-                incorrectCount++;
-            }
+            const r = this.executeSubmitTest(action, actionTests[i], i);
+            results.push(r);
+            if (r.correct) correct++; else incorrect++;
         }
 
-        return {
-            action: action,
-            found: true,
-            count: actionTests.length,
-            correct: correctCount,
-            incorrect: incorrectCount,
-            results: results
-        };
+        return { action, count: actionTests.length, correct, incorrect, results };
     }
 
-    /**
-     * Encuentra los tests para una acción específica
-     * @private
-     */
-    findTestsForAction(action) {
-        if (!this.testSubmitData || !Array.isArray(this.testSubmitData)) {
-            return [];
-        }
+    // ─────────────────────────────────────────────────────
+    //  EJECUCIÓN DE PRUEBA DE SUBMIT
+    //  Formato test: [entity, action, num, description, {fields...}, expectedResult]
+    // ─────────────────────────────────────────────────────
 
-        return this.testSubmitData.filter(test => {
-            return test.action && test.action.toUpperCase() === action.toUpperCase();
-        });
-    }
-
-    /**
-     * Ejecuta una prueba de submit individual
-     * @private
-     */
     executeSubmitTest(action, test, index) {
         try {
-            // Crear objeto simulado de datos de formulario
-            const formData = test.formData || {};
+            const [entity, testAction, num, description, formData, expectedResult] = test;
 
-            // Ejecutar CheckSubmit si existe en la clase de entidad
-            const entityClassName = `${this.entityName}_Class`;
-            const entityClass = window[entityClassName];
+            const checkResult = this.checkSubmit(action, formData || {});
 
-            let checkResult = null;
+            const expectedError = expectedResult !== true;
+            const hasErrors     = checkResult !== true;
+            const correct       = expectedError === hasErrors;
 
-            if (entityClass && typeof entityClass.CheckSubmit === 'function') {
-                try {
-                    checkResult = entityClass.CheckSubmit(action, formData);
-                } catch (error) {
-                    checkResult = {
-                        valid: false,
-                        errors: [error.message]
-                    };
-                }
+            return {
+                num: num || (index + 1),
+                description: description || `Prueba ${index + 1}`,
+                action,
+                expectedResult,
+                actualResult: checkResult,
+                shouldHaveError: expectedError,
+                hasError: hasErrors,
+                correct,
+                message: checkResult !== true ? String(checkResult) : 'Submit válido'
+            };
+        } catch (err) {
+            return {
+                num: (test && test[2]) || (index + 1),
+                description: (test && test[3]) || '',
+                action,
+                correct: false,
+                message: `Excepción: ${err.message}`
+            };
+        }
+    }
+
+    // ─────────────────────────────────────────────────────
+    //  CheckSubmit: valida todos los campos del formulario
+    //  Devuelve true si todo OK, o primer mensaje de error
+    // ─────────────────────────────────────────────────────
+
+    checkSubmit(action, formData) {
+        if (!this.estructura || !this.estructura.attributes) {
+            return 'Estructura no disponible';
+        }
+
+        const normalizedAction = this.normalizeAction(action);
+
+        for (const [fieldName, fieldDef] of Object.entries(this.estructura.attributes)) {
+            const validations = (fieldDef.rules && fieldDef.rules.validations && fieldDef.rules.validations[normalizedAction])
+                ? fieldDef.rules.validations[normalizedAction]
+                : {};
+
+            // Determinar si el campo es nullable en esta acción
+            const isNullDef  = (fieldDef.db && fieldDef.db.is_null) ? fieldDef.db.is_null : {};
+            const isNullable = typeof isNullDef === 'object' && isNullDef[normalizedAction] === true;
+
+            const htmlTag  = fieldDef.html ? fieldDef.html.tag  : 'input';
+            const htmlType = fieldDef.html ? fieldDef.html.type : 'text';
+            const isFile   = (htmlTag === 'file' || htmlType === 'file');
+
+            // Extraer valor del formData (puede no estar presente)
+            const hasField = Object.prototype.hasOwnProperty.call(formData, fieldName);
+            const rawValue = hasField ? formData[fieldName] : undefined;
+
+            // Si el campo no está en formData: saltar (no incluido en este submit)
+            if (rawValue === undefined) continue;
+
+            let result;
+            if (isFile) {
+                result = this.validateFileValue(fieldName, rawValue, formData, validations, isNullable, normalizedAction);
             } else {
-                // Si no existe CheckSubmit, simular validación básica
-                checkResult = this.simulateCheckSubmit(action, formData, test);
+                result = this.validateFieldValue(fieldName, rawValue, validations, isNullable, normalizedAction);
             }
 
-            // Determinar si el resultado es correcto
-            const isExpectedError = test.expectError === true;
-            const hasErrors = checkResult.valid === false || 
-                            (checkResult.errors && checkResult.errors.length > 0);
-            
-            const isCorrect = isExpectedError === hasErrors;
-
-            return {
-                testNumber: index + 1,
-                action: action,
-                description: test.description || `Test ${index + 1} para ${action}`,
-                formData: formData,
-                expectError: isExpectedError,
-                hasErrors: hasErrors,
-                errors: checkResult.errors || [],
-                correct: isCorrect
-            };
-        } catch (error) {
-            return {
-                testNumber: index + 1,
-                action: action,
-                description: test.description || `Test ${index + 1} para ${action}`,
-                expectError: test.expectError,
-                hasErrors: true,
-                errors: [error.message],
-                correct: false
-            };
+            if (result !== true) return result;
         }
+
+        return true;
     }
 
-    /**
-     * Simula CheckSubmit si la clase de entidad no lo implementa
-     * @private
-     */
-    simulateCheckSubmit(action, formData, test) {
-        const errors = [];
-
-        // Validar que los campos requeridos estén presentes
-        if (!formData || Object.keys(formData).length === 0) {
-            errors.push('Formulario vacío');
-        }
-
-        // Validar según la acción
-        switch (action.toUpperCase()) {
-            case 'CREATE':
-                // Para CREATE, todos los campos deben ser válidos
-                for (const [key, value] of Object.entries(formData)) {
-                    if (!value || value.toString().trim() === '') {
-                        errors.push(`Campo ${key} es requerido para CREATE`);
-                    }
-                }
-                break;
-            case 'UPDATE':
-            case 'EDIT':
-                // Para UPDATE/EDIT, debe haber un ID y al menos un campo a actualizar
-                if (!formData.id) {
-                    errors.push('ID es requerido para UPDATE/EDIT');
-                }
-                break;
-            case 'DELETE':
-                // Para DELETE, solo se necesita el ID
-                if (!formData.id) {
-                    errors.push('ID es requerido para DELETE');
-                }
-                break;
-            case 'READ':
-                // Para READ, se puede buscar por ID o por otros criterios
-                if (!formData.id && (!formData.search || formData.search.toString().trim() === '')) {
-                    errors.push('Se requiere ID o criterio de búsqueda para READ');
-                }
-                break;
-        }
-
-        return {
-            valid: errors.length === 0,
-            errors: errors
-        };
+    normalizeAction(action) {
+        const map = { 'CREATE': 'ADD', 'UPDATE': 'EDIT', 'READ': 'SEARCH', 'DELETE': 'SEARCH' };
+        return map[action.toUpperCase()] || action.toUpperCase();
     }
 
-    /**
-     * Muestra los resultados en una ventana modal
-     */
+    validateFieldValue(fieldName, rawValue, validations, isNullable, action) {
+        const strVal = (rawValue === null || rawValue === undefined) ? '' : String(rawValue);
+        const empty  = strVal.trim() === '';
+
+        // Required: campo NOT NULL y acción es ADD o EDIT
+        if (!isNullable && (action === 'ADD' || action === 'EDIT') && empty) {
+            return `${fieldName}: Campo requerido`;
+        }
+        if (empty) return true; // nullable o SEARCH vacío -> OK
+
+        // exp_reg (formato, includes digit-only check)
+        if (validations.exp_reg) {
+            try {
+                if (!new RegExp(validations.exp_reg).test(strVal)) {
+                    return `${fieldName}: Formato no válido`;
+                }
+            } catch (e) { /* ignore */ }
+        }
+
+        // min_size
+        if (validations.min_size !== undefined && strVal.length < validations.min_size) {
+            return `${fieldName}: Mínimo ${validations.min_size} caracteres`;
+        }
+
+        // max_size
+        if (validations.max_size !== undefined && strVal.length > validations.max_size) {
+            return `${fieldName}: Máximo ${validations.max_size} caracteres`;
+        }
+
+        // valid_date
+        if (validations.valid_date) {
+            const r = this.validateDate(strVal);
+            if (r !== true) return `${fieldName}: ${r}`;
+        }
+
+        return true;
+    }
+
+    validateFileValue(fieldName, rawValue, formData, validations, isNullable, action) {
+        const empty = rawValue === null || rawValue === undefined;
+
+        if (empty) {
+            if (validations.no_file || (!isNullable && (action === 'ADD' || action === 'EDIT'))) {
+                return `${fieldName}: No se ha seleccionado ningún fichero`;
+            }
+            return true;
+        }
+
+        const fileName = String(rawValue);
+        const mimeType = formData.mimeType;
+        const size     = formData.size;
+
+        // type_file
+        if (validations.type_file && Array.isArray(validations.type_file)) {
+            const allowed = validations.type_file.map(t => t.type_file);
+            if (mimeType && !allowed.includes(mimeType)) {
+                return `${fieldName}: Tipo de fichero no permitido`;
+            }
+        }
+
+        // max_size_file
+        if (validations.max_size_file && Array.isArray(validations.max_size_file)) {
+            const maxBytes = validations.max_size_file[0].max_size_file;
+            if (size !== undefined && size > maxBytes) {
+                return `${fieldName}: El fichero supera ${maxBytes} bytes`;
+            }
+        }
+
+        // format_name_file
+        if (validations.format_name_file && Array.isArray(validations.format_name_file)) {
+            const pattern = validations.format_name_file[0].format_name_file;
+            try {
+                if (!new RegExp(pattern).test(fileName)) {
+                    return `${fieldName}: Nombre de fichero con formato incorrecto`;
+                }
+            } catch (e) { /* ignore */ }
+        }
+
+        // min/max del nombre
+        if (validations.min_size !== undefined && fileName.length < validations.min_size) {
+            return `${fieldName}: Nombre demasiado corto (mínimo ${validations.min_size})`;
+        }
+        if (validations.max_size !== undefined && fileName.length > validations.max_size) {
+            return `${fieldName}: Nombre demasiado largo (máximo ${validations.max_size})`;
+        }
+
+        return true;
+    }
+
+    validateDate(value) {
+        if (!value) return true;
+        if (!/^\d{2}[\/\-]\d{2}[\/\-]\d{4}$/.test(value)) {
+            return 'Formato de fecha inválido (DD-MM-YYYY)';
+        }
+        const sep   = value[2];
+        const [day, month, year] = value.split(sep).map(Number);
+        const d = new Date(year, month - 1, day);
+        if (d.getFullYear() !== year || d.getMonth() !== month - 1 || d.getDate() !== day) {
+            return 'Fecha no válida';
+        }
+        return true;
+    }
+
+    // ─────────────────────────────────────────────────────
+    //  PRESENTACIÓN
+    // ─────────────────────────────────────────────────────
+
     displayResults(analyses) {
-        const modal = this.createResultsModal(analyses);
+        const modal = this.buildModal(`Test de Formulario — ${this.entityName}`);
+        const content = modal.querySelector('.modal-content');
+
+        const summary = document.createElement('div');
+        summary.style.cssText = 'padding:15px;border-bottom:1px solid #e0e0e0;';
+        summary.innerHTML = '<h3>Resumen por Acción</h3>';
+
+        const allResults = {};
+        for (const [action, data] of Object.entries(analyses)) {
+            allResults[action] = data.results;
+            const div = document.createElement('div');
+            div.style.cssText = 'margin-bottom:10px;padding:10px;background:#f9f9f9;border-radius:4px;';
+            div.innerHTML = `
+                <strong>${action}</strong>: ${data.count} pruebas —
+                <span style="color:#4caf50;">${data.correct} correctas</span> /
+                <span style="color:#f44336;">${data.incorrect} incorrectas</span>`;
+            summary.appendChild(div);
+        }
+        content.appendChild(summary);
+
+        const btnSec = document.createElement('div');
+        btnSec.style.cssText = 'padding:15px;text-align:center;background:#f5f5f5;';
+        const btn = document.createElement('button');
+        btn.textContent = 'Ver Detalles de Pruebas de Submit';
+        btn.style.cssText = 'padding:10px 20px;background:#667eea;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px;';
+        btn.onclick = () => this.showDetailedResults(allResults);
+        btnSec.appendChild(btn);
+        content.appendChild(btnSec);
+
         document.body.appendChild(modal);
     }
 
-    /**
-     * Crea el modal de resultados
-     * @private
-     */
-    createResultsModal(analyses) {
+    showDetailedResults(allResults) {
+        const modal = this.buildModal(`Detalles de Submit — ${this.entityName}`);
+        const content = modal.querySelector('.modal-content');
+        content.style.minWidth = '750px';
+
+        for (const [action, results] of Object.entries(allResults)) {
+            if (!results || results.length === 0) continue;
+            const sec = document.createElement('div');
+            sec.style.padding = '10px 15px';
+            sec.innerHTML = `<h3 style="color:#667eea;">${action}</h3>`;
+
+            const table = document.createElement('table');
+            table.style.cssText = 'width:100%;border-collapse:collapse;font-size:13px;margin-bottom:20px;';
+            table.innerHTML = `
+                <thead>
+                    <tr style="background:#f5f5f5;border-bottom:2px solid #ddd;">
+                        <th style="padding:8px;">#</th>
+                        <th style="padding:8px;text-align:left;">Descripción</th>
+                        <th style="padding:8px;text-align:center;">Esperado</th>
+                        <th style="padding:8px;text-align:left;">Obtenido</th>
+                        <th style="padding:8px;text-align:center;">Estado</th>
+                    </tr>
+                </thead>`;
+            const tbody = document.createElement('tbody');
+            for (const r of results) {
+                const row = document.createElement('tr');
+                row.style.borderBottom = '1px solid #e0e0e0';
+                if (!r.correct) row.style.backgroundColor = '#fff3f3';
+                const color    = r.correct ? '#4caf50' : '#f44336';
+                const status   = r.correct ? '✓ OK' : '✗ FALLO';
+                const expected = r.expectedResult === true ? 'Éxito' : `Error (${r.expectedResult})`;
+                row.innerHTML = `
+                    <td style="padding:8px;text-align:center;">${r.num}</td>
+                    <td style="padding:8px;">${r.description}</td>
+                    <td style="padding:8px;text-align:center;">${expected}</td>
+                    <td style="padding:8px;">${r.message}</td>
+                    <td style="padding:8px;text-align:center;color:${color};font-weight:bold;">${status}</td>`;
+                tbody.appendChild(row);
+            }
+            table.appendChild(tbody);
+            sec.appendChild(table);
+            content.appendChild(sec);
+        }
+
+        document.body.appendChild(modal);
+    }
+
+    buildModal(titleText) {
         const modal = document.createElement('div');
         modal.className = 'modal';
         modal.style.display = 'flex';
-
         const content = document.createElement('div');
         content.className = 'modal-content';
-        content.style.maxHeight = '90vh';
-        content.style.overflow = 'auto';
-
-        // Encabezado
+        content.style.cssText = 'max-height:90vh;overflow-x:auto;overflow-y:auto;min-width:600px;max-width:95vw;';
         const header = document.createElement('div');
         header.className = 'modal-header';
-        const title = document.createElement('h2');
-        title.textContent = `Pruebas de Submit - ${this.entityName}`;
+        header.innerHTML = `<h2>${titleText}</h2>`;
         const closeBtn = document.createElement('span');
         closeBtn.className = 'close-btn';
         closeBtn.innerHTML = '&times;';
         closeBtn.style.cursor = 'pointer';
         closeBtn.onclick = () => modal.remove();
-
-        header.appendChild(title);
         header.appendChild(closeBtn);
         content.appendChild(header);
-
-        // Resumen por acción
-        for (const action of ['CREATE', 'UPDATE', 'EDIT', 'DELETE', 'READ']) {
-            const analysis = analyses[action];
-            if (analysis.found) {
-                content.appendChild(this.createActionSection(analysis));
-            }
-        }
-
-        // Botón para ver detalles
-        content.appendChild(this.createDetailButton(analyses));
-
         modal.appendChild(content);
         return modal;
     }
 
-    /**
-     * Crea sección para cada acción
-     * @private
-     */
-    createActionSection(analysis) {
-        const section = document.createElement('div');
-        section.className = 'modal-section';
-        section.style.padding = '15px';
-        section.style.borderBottom = '1px solid #e0e0e0';
-        section.style.backgroundColor = analysis.correct === analysis.count ? '#e8f5e9' : '#fff3e0';
-
-        const actionTitle = document.createElement('h3');
-        actionTitle.textContent = `${analysis.action}`;
-        actionTitle.style.marginBottom = '10px';
-        section.appendChild(actionTitle);
-
-        const info = document.createElement('div');
-        info.style.fontSize = '14px';
-        info.innerHTML = `
-            <p><strong>Pruebas realizadas:</strong> ${analysis.count}</p>
-            <p style="color: #4caf50;"><strong>Correctas:</strong> ${analysis.correct}</p>
-            <p style="color: #f44336;"><strong>Incorrectas:</strong> ${analysis.incorrect}</p>
-        `;
-        section.appendChild(info);
-
-        return section;
-    }
-
-    /**
-     * Crea botón para ver detalles
-     * @private
-     */
-    createDetailButton(analyses) {
-        const section = document.createElement('div');
-        section.style.padding = '15px';
-        section.style.textAlign = 'center';
-        section.style.backgroundColor = '#f5f5f5';
-
-        const button = document.createElement('button');
-        button.textContent = 'Ver Detalles de cada Prueba';
-        button.style.padding = '10px 20px';
-        button.style.backgroundColor = '#667eea';
-        button.style.color = 'white';
-        button.style.border = 'none';
-        button.style.borderRadius = '4px';
-        button.style.cursor = 'pointer';
-        button.style.fontSize = '14px';
-
-        button.onclick = () => {
-            this.showDetailedResults(analyses);
-        };
-
-        section.appendChild(button);
-        return section;
-    }
-
-    /**
-     * Muestra resultados detallados de todas las pruebas
-     */
-    showDetailedResults(analyses) {
-        const modal = document.createElement('div');
-        modal.className = 'modal';
-        modal.style.display = 'flex';
-
-        const content = document.createElement('div');
-        content.className = 'modal-content';
-        content.style.maxHeight = '90vh';
-        content.style.overflow = 'auto';
-
-        // Encabezado
-        const header = document.createElement('div');
-        header.className = 'modal-header';
-        const title = document.createElement('h2');
-        title.textContent = 'Detalles de Pruebas de Submit';
-        const closeBtn = document.createElement('span');
-        closeBtn.className = 'close-btn';
-        closeBtn.innerHTML = '&times;';
-        closeBtn.style.cursor = 'pointer';
-        closeBtn.onclick = () => modal.remove();
-
-        header.appendChild(title);
-        header.appendChild(closeBtn);
-        content.appendChild(header);
-
-        // Tabla de resultados por acción
-        for (const action of ['CREATE', 'UPDATE', 'EDIT', 'DELETE', 'READ']) {
-            const analysis = analyses[action];
-            if (analysis.found && analysis.results.length > 0) {
-                content.appendChild(this.createDetailTable(action, analysis.results));
-            }
-        }
-
-        modal.appendChild(content);
-        document.body.appendChild(modal);
-    }
-
-    /**
-     * Crea tabla de detalles para una acción
-     * @private
-     */
-    createDetailTable(action, results) {
-        const container = document.createElement('div');
-        container.style.padding = '15px';
-        container.style.borderBottom = '1px solid #e0e0e0';
-
-        const title = document.createElement('h3');
-        title.textContent = `Detalles - ${action}`;
-        title.style.marginBottom = '10px';
-        container.appendChild(title);
-
-        const table = document.createElement('table');
-        table.style.width = '100%';
-        table.style.borderCollapse = 'collapse';
-        table.style.fontSize = '12px';
-
-        const thead = document.createElement('thead');
-        thead.innerHTML = `
-            <tr style="background-color: #f5f5f5; border-bottom: 2px solid #ddd;">
-                <th style="padding: 8px; text-align: left;">#</th>
-                <th style="padding: 8px; text-align: left;">Descripción</th>
-                <th style="padding: 8px; text-align: center;">Esperado</th>
-                <th style="padding: 8px; text-align: center;">Resultado</th>
-                <th style="padding: 8px; text-align: center;">Estado</th>
-            </tr>
-        `;
-        table.appendChild(thead);
-
-        const tbody = document.createElement('tbody');
-        for (const result of results) {
-            const row = document.createElement('tr');
-            row.style.borderBottom = '1px solid #e0e0e0';
-            
-            const statusColor = result.correct ? '#4caf50' : '#f44336';
-            const statusText = result.correct ? '✓ OK' : '✗ FALLO';
-
-            row.innerHTML = `
-                <td style="padding: 8px;">${result.testNumber}</td>
-                <td style="padding: 8px;">${result.description}</td>
-                <td style="padding: 8px; text-align: center;">${result.expectError ? 'Error' : 'OK'}</td>
-                <td style="padding: 8px; text-align: center;">${result.hasErrors ? 'Error' : 'OK'}</td>
-                <td style="padding: 8px; text-align: center; color: ${statusColor}; font-weight: bold;">${statusText}</td>
-            `;
-            tbody.appendChild(row);
-        }
-
-        // Fila de detalles de errores si existen
-        for (let i = 0; i < results.length; i++) {
-            const result = results[i];
-            if (result.errors && result.errors.length > 0) {
-                const errorRow = document.createElement('tr');
-                errorRow.style.backgroundColor = '#ffe0e0';
-                errorRow.style.borderBottom = '1px solid #e0e0e0';
-                errorRow.innerHTML = `
-                    <td colspan="5" style="padding: 8px;">
-                        <strong>Errores:</strong> ${result.errors.join(', ')}
-                    </td>
-                `;
-                tbody.appendChild(errorRow);
-            }
-        }
-
-        table.appendChild(tbody);
-        container.appendChild(table);
-
-        return container;
-    }
-
-    /**
-     * Muestra un error
-     * @private
-     */
     showError(title, message) {
-        const modal = document.createElement('div');
-        modal.className = 'modal';
-        modal.style.display = 'flex';
-
-        const content = document.createElement('div');
-        content.className = 'modal-content';
-
-        const header = document.createElement('div');
-        header.className = 'modal-header';
-        header.style.backgroundColor = '#f44336';
-        const titleEl = document.createElement('h2');
-        titleEl.textContent = title;
-        titleEl.style.color = 'white';
-        const closeBtn = document.createElement('span');
-        closeBtn.className = 'close-btn';
-        closeBtn.innerHTML = '&times;';
-        closeBtn.style.cursor = 'pointer';
-        closeBtn.style.color = 'white';
-        closeBtn.onclick = () => modal.remove();
-
-        header.appendChild(titleEl);
-        header.appendChild(closeBtn);
-        content.appendChild(header);
-
+        const modal = this.buildModal(title);
+        const content = modal.querySelector('.modal-content');
+        content.querySelector('.modal-header').style.backgroundColor = '#f44336';
         const body = document.createElement('div');
         body.style.padding = '20px';
         body.textContent = message;
         content.appendChild(body);
-
-        modal.appendChild(content);
         document.body.appendChild(modal);
     }
 }

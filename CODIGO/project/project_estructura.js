@@ -16,10 +16,12 @@ window.project_estructura = {
             rules: {
                 validations: {
                     ADD: {
+                        exp_reg: '^[0-9]+$',
                         min_size: 1,
                         max_size: 11
                     },
                     EDIT: {
+                        exp_reg: '^[0-9]+$',
                         min_size: 1,
                         max_size: 11
                     }
@@ -30,7 +32,7 @@ window.project_estructura = {
             html: {
                 tag: 'input',
                 type: 'text',
-                component_visible_size: 150
+                component_visible_size: 100
             },
             db: {
                 is_null: {},
@@ -39,17 +41,17 @@ window.project_estructura = {
             rules: {
                 validations: {
                     ADD: {
-                        min_size: 10,
-                        max_size: 150,
+                        min_size: 15,
+                        max_size: 100,
                         exp_reg: '^[a-zA-Z0-9\\s]+$'
                     },
                     EDIT: {
-                        min_size: 10,
-                        max_size: 150,
+                        min_size: 15,
+                        max_size: 100,
                         exp_reg: '^[a-zA-Z0-9\\s]+$'
                     },
                     SEARCH: {
-                        max_size: 150
+                        max_size: 100
                     }
                 }
             }
@@ -57,7 +59,7 @@ window.project_estructura = {
         start_date_project: {
             html: {
                 tag: 'input',
-                type: 'date',
+                type: 'text',
                 component_visible_size: 15
             },
             db: {
@@ -67,13 +69,16 @@ window.project_estructura = {
             rules: {
                 validations: {
                     ADD: {
-                        valid_date: true
+                        valid_date: true,
+                        personalized: true
                     },
                     EDIT: {
-                        valid_date: true
+                        valid_date: true,
+                        personalized: true
                     },
                     SEARCH: {
-                        valid_date: true
+                        valid_date: true,
+                        personalized: true
                     }
                 }
             }
@@ -81,57 +86,47 @@ window.project_estructura = {
         end_date_project: {
             html: {
                 tag: 'input',
-                type: 'date',
+                type: 'text',
                 component_visible_size: 15
             },
             db: {
-                is_null: {
-                    ADD: true,
-                    EDIT: true,
-                    SEARCH: true
-                },
+                is_null: {},
                 type: ['date']
             },
             rules: {
                 validations: {
                     ADD: {
-                        valid_date: true
+                        valid_date: true,
+                        personalized: true
                     },
                     EDIT: {
-                        valid_date: true
+                        valid_date: true,
+                        personalized: true
                     },
                     SEARCH: {
-                        valid_date: true
+                        valid_date: true,
+                        personalized: true
                     }
                 }
             }
         },
         responsable_project: {
             html: {
-                tag: 'input',
-                type: 'text',
-                component_visible_size: 100
+                tag: 'select',
+                options: [],
+                component_visible_size: 60
             },
             db: {
-                is_null: {
-                    ADD: true,
-                    EDIT: true,
-                    SEARCH: true
-                },
-                type: ['string']
+                is_null: {},
+                type: ['int']
             },
             rules: {
                 validations: {
                     ADD: {
-                        min_size: 5,
-                        max_size: 100
+                        exp_reg: '^[0-9]+$'
                     },
                     EDIT: {
-                        min_size: 5,
-                        max_size: 100
-                    },
-                    SEARCH: {
-                        max_size: 100
+                        exp_reg: '^[0-9]+$'
                     }
                 }
             }
@@ -143,25 +138,23 @@ window.project_estructura = {
                 component_visible_size: 100
             },
             db: {
-                is_null: {
-                    ADD: true,
-                    EDIT: true,
-                    SEARCH: true
-                },
+                is_null: {},
                 type: ['string']
             },
             rules: {
                 validations: {
                     ADD: {
                         min_size: 5,
-                        max_size: 100
+                        max_size: 120,
+                        exp_reg: '^[a-zA-Z0-9\\s]+$'
                     },
                     EDIT: {
                         min_size: 5,
-                        max_size: 100
+                        max_size: 120,
+                        exp_reg: '^[a-zA-Z0-9\\s]+$'
                     },
                     SEARCH: {
-                        max_size: 100
+                        max_size: 120
                     }
                 }
             }
@@ -174,19 +167,17 @@ window.project_estructura = {
                 component_visible_size: 60
             },
             db: {
-                is_null: {
-                    ADD: true,
-                    EDIT: true,
-                    SEARCH: true
-                },
+                is_null: {},
                 type: ['string']
             },
             rules: {
                 validations: {
                     ADD: {
+                        min_size: 30,
                         max_size: 500
                     },
                     EDIT: {
+                        min_size: 30,
                         max_size: 500
                     },
                     SEARCH: {
@@ -203,34 +194,33 @@ window.project_estructura = {
                 component_visible_size: 80
             },
             db: {
-                is_null: {
-                    ADD: true,
-                    EDIT: true,
-                    SEARCH: true
-                },
+                is_null: {},
                 type: ['string']
             },
             rules: {
                 validations: {
                     ADD: {
+                        no_file: true,
                         type_file: [
                             { type_file: 'application/pdf' },
                             { type_file: 'application/msword' },
-                            { type_file: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' },
-                            { type_file: 'text/plain' }
+                            { type_file: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' }
                         ],
-                        max_size_file: [{ max_size_file: 5242880 }],
-                        format_name_file: [{ format_name_file: '^[a-zA-Z0-9\\._\\-]+$' }]
+                        max_size_file: [{ max_size_file: 2000000 }],
+                        format_name_file: [{ format_name_file: '^[a-zA-Z0-9\\.]+$' }],
+                        min_size: 7,
+                        max_size: 100
                     },
                     EDIT: {
                         type_file: [
                             { type_file: 'application/pdf' },
                             { type_file: 'application/msword' },
-                            { type_file: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' },
-                            { type_file: 'text/plain' }
+                            { type_file: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' }
                         ],
-                        max_size_file: [{ max_size_file: 5242880 }],
-                        format_name_file: [{ format_name_file: '^[a-zA-Z0-9\\._\\-]+$' }]
+                        max_size_file: [{ max_size_file: 2000000 }],
+                        format_name_file: [{ format_name_file: '^[a-zA-Z0-9\\.]+$' }],
+                        min_size: 7,
+                        max_size: 100
                     }
                 }
             }
@@ -239,25 +229,23 @@ window.project_estructura = {
             html: {
                 tag: 'input',
                 type: 'text',
-                component_visible_size: 20
+                component_visible_size: 50
             },
             db: {
-                is_null: {
-                    ADD: true,
-                    EDIT: true,
-                    SEARCH: true
-                },
+                is_null: {},
                 type: ['string']
             },
             rules: {
                 validations: {
                     ADD: {
+                        min_size: 3,
                         max_size: 20,
-                        exp_reg: '^\\S+$'
+                        exp_reg: '^[a-zA-Z0-9_\\-]+$'
                     },
                     EDIT: {
+                        min_size: 3,
                         max_size: 20,
-                        exp_reg: '^\\S+$'
+                        exp_reg: '^[a-zA-Z0-9_\\-]+$'
                     },
                     SEARCH: {
                         max_size: 20
@@ -269,52 +257,50 @@ window.project_estructura = {
             html: {
                 tag: 'input',
                 type: 'text',
-                component_visible_size: 10
+                component_visible_size: 15
             },
             db: {
-                is_null: {
-                    ADD: true,
-                    EDIT: true,
-                    SEARCH: true
-                },
+                is_null: {},
                 type: ['string']
             },
             rules: {
                 validations: {
                     ADD: {
-                        max_size: 10,
+                        min_size: 2,
+                        max_size: 15,
                         exp_reg: '^\\S+$'
                     },
                     EDIT: {
-                        max_size: 10,
+                        min_size: 2,
+                        max_size: 15,
                         exp_reg: '^\\S+$'
                     },
                     SEARCH: {
-                        max_size: 10
+                        max_size: 15
                     }
                 }
             }
         },
         id_sampling_methodology_project: {
             html: {
-                tag: 'input',
-                type: 'number',
+                tag: 'select',
+                options: [],
                 component_visible_size: 11
             },
             db: {
-                is_null: {
-                    ADD: true,
-                    EDIT: true,
-                    SEARCH: true
-                },
+                is_null: {},
                 type: ['int']
             },
             rules: {
                 validations: {
                     ADD: {
+                        exp_reg: '^[0-9]+$',
+                        min_size: 1,
                         max_size: 11
                     },
                     EDIT: {
+                        exp_reg: '^[0-9]+$',
+                        min_size: 1,
                         max_size: 11
                     }
                 }

@@ -16,10 +16,12 @@ window.characteristic_estructura = {
             rules: {
                 validations: {
                     ADD: {
+                        exp_reg: '^[0-9]+$',
                         min_size: 1,
                         max_size: 11
                     },
                     EDIT: {
+                        exp_reg: '^[0-9]+$',
                         min_size: 1,
                         max_size: 11
                     }
@@ -68,15 +70,17 @@ window.characteristic_estructura = {
             rules: {
                 validations: {
                     ADD: {
-                        max_size: 300,
+                        min_size: 80,
+                        max_size: 5000,
                         exp_reg: '^[a-zA-Z0-9\\s\\.,;:!?\\(\\)\\-]+$'
                     },
                     EDIT: {
-                        max_size: 300,
+                        min_size: 80,
+                        max_size: 5000,
                         exp_reg: '^[a-zA-Z0-9\\s\\.,;:!?\\(\\)\\-]+$'
                     },
                     SEARCH: {
-                        max_size: 300
+                        max_size: 5000
                     }
                 }
             }
@@ -84,7 +88,7 @@ window.characteristic_estructura = {
         data_type_characteristic: {
             html: {
                 tag: 'select',
-                options: ['string', 'integer', 'decimal', 'date', 'boolean', 'text'],
+                options: ['number', 'text', 'set'],
                 component_visible_size: 20
             },
             db: {
@@ -94,41 +98,37 @@ window.characteristic_estructura = {
             rules: {
                 validations: {
                     ADD: {
-                        exp_reg: '^(string|integer|decimal|date|boolean|text)$'
+                        exp_reg: '^(number|text|set)$'
                     },
                     EDIT: {
-                        exp_reg: '^(string|integer|decimal|date|boolean|text)$'
+                        exp_reg: '^(number|text|set)$'
                     },
                     SEARCH: {
-                        exp_reg: '^(string|integer|decimal|date|boolean|text)$'
+                        exp_reg: '^(number|text|set)$'
                     }
                 }
             }
         },
         category_characteristic: {
             html: {
-                tag: 'input',
-                type: 'text',
-                component_visible_size: 50
+                tag: 'select',
+                options: ['soil_site', 'soil_chem', 'soil_bio'],
+                component_visible_size: 20
             },
             db: {
-                is_null: {
-                    ADD: true,
-                    EDIT: true,
-                    SEARCH: true
-                },
+                is_null: {},
                 type: ['string']
             },
             rules: {
                 validations: {
                     ADD: {
-                        max_size: 50
+                        exp_reg: '^(soil_site|soil_chem|soil_bio)$'
                     },
                     EDIT: {
-                        max_size: 50
+                        exp_reg: '^(soil_site|soil_chem|soil_bio)$'
                     },
                     SEARCH: {
-                        max_size: 50
+                        exp_reg: '^(soil_site|soil_chem|soil_bio)$'
                     }
                 }
             }
@@ -137,26 +137,24 @@ window.characteristic_estructura = {
             html: {
                 tag: 'input',
                 type: 'text',
-                component_visible_size: 255
+                component_visible_size: 200
             },
             db: {
-                is_null: {
-                    ADD: true,
-                    EDIT: true,
-                    SEARCH: true
-                },
+                is_null: {},
                 type: ['string']
             },
             rules: {
                 validations: {
                     ADD: {
-                        max_size: 255
+                        min_size: 16,
+                        max_size: 200
                     },
                     EDIT: {
-                        max_size: 255
+                        min_size: 16,
+                        max_size: 200
                     },
                     SEARCH: {
-                        max_size: 255
+                        max_size: 200
                     }
                 }
             }
@@ -169,34 +167,33 @@ window.characteristic_estructura = {
                 component_visible_size: 80
             },
             db: {
-                is_null: {
-                    ADD: true,
-                    EDIT: true,
-                    SEARCH: true
-                },
+                is_null: {},
                 type: ['string']
             },
             rules: {
                 validations: {
                     ADD: {
+                        no_file: true,
                         type_file: [
                             { type_file: 'application/pdf' },
                             { type_file: 'application/msword' },
-                            { type_file: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' },
-                            { type_file: 'text/plain' }
+                            { type_file: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' }
                         ],
-                        max_size_file: [{ max_size_file: 5242880 }],
-                        format_name_file: [{ format_name_file: '^[a-zA-Z0-9\\._\\-]+$' }]
+                        max_size_file: [{ max_size_file: 200000 }],
+                        format_name_file: [{ format_name_file: '^[a-zA-Z0-9\\.]+$' }],
+                        min_size: 7,
+                        max_size: 100
                     },
                     EDIT: {
                         type_file: [
                             { type_file: 'application/pdf' },
                             { type_file: 'application/msword' },
-                            { type_file: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' },
-                            { type_file: 'text/plain' }
+                            { type_file: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' }
                         ],
-                        max_size_file: [{ max_size_file: 5242880 }],
-                        format_name_file: [{ format_name_file: '^[a-zA-Z0-9\\._\\-]+$' }]
+                        max_size_file: [{ max_size_file: 200000 }],
+                        format_name_file: [{ format_name_file: '^[a-zA-Z0-9\\.]+$' }],
+                        min_size: 7,
+                        max_size: 100
                     }
                 }
             }

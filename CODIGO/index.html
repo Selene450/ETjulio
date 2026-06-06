@@ -152,8 +152,8 @@
         function testAttributesButton(entityName) {
             try {
                 const gestor = new Gestor(entityName);
-                const testForm = new TestForm(entityName, gestor.entityData.estructura);
-                testForm.analyze();
+                const testForm = new TestForm(entityName, gestor);
+                testForm.showWindow();
             } catch (error) {
                 showErrorModal('Error en TestForm: ' + error.message);
             }
@@ -162,8 +162,8 @@
         function testFormButton(entityName) {
             try {
                 const gestor = new Gestor(entityName);
-                const testSubmit = new TestSubmit(entityName, gestor.entityData.testSubmit);
-                testSubmit.analyze();
+                const testSubmit = new TestSubmit(entityName, gestor);
+                testSubmit.showWindow();
             } catch (error) {
                 showErrorModal('Error en TestSubmit: ' + error.message);
             }

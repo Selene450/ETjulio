@@ -34,11 +34,11 @@ class Gestor {
         }
 
         // Verificar array de pruebas
-        const pruebasVarName = `${this.entityName}_tests_fields`;
+        const pruebasVarName = `${this.entityName}_pruebas`;
         if (typeof window[pruebasVarName] === 'undefined') {
             errors.push(`Variable ${pruebasVarName} no encontrada`);
         } else {
-            this.entityData.tests_fields = window[pruebasVarName];
+            this.entityData.pruebas = window[pruebasVarName];
         }
 
         // Verificar variable TestSubmit
@@ -139,7 +139,7 @@ class Gestor {
      * @returns {Array} Array de valores de prueba
      */
     getTestsFields() {
-        return this.entityData.tests_fields || [];
+        return this.entityData.pruebas || [];
     }
 
     /**
