@@ -172,10 +172,19 @@ class TestForm {
             const [entity, fieldName, defTestNum, pruebaNum, action, valuesArr, expectedResult] = prueba;
 
             // Localizar definición de test correspondiente (por número de def)
-            const defTest = Array.isArray(this.defTests)
-                ? this.defTests.find(d => Array.isArray(d) && d[3] === defTestNum)
-                : null;
-            const testDescription = defTest ? defTest[4] : `Prueba ${pruebaNum}`;
+            let defTest;
+            if (Array.isArray(this.defTests)) {
+                defTest = this.defTests.find(d => Array.isArray(d) && d[3] === defTestNum);
+            } else {
+                defTest = null;
+            }
+            
+            let testDescription;
+            if (defTest) {
+                testDescription = defTest[4];
+            } else {
+                testDescription = `Prueba ${pruebaNum}`;
+            }
 
             // Obtener definición del campo en la estructura
             const fieldDef = this.estructura && this.estructura.attributes
@@ -191,18 +200,37 @@ class TestForm {
             }
 
             // Extraer valor de prueba: valuesArr es [{fieldName: value, mimeType?, size?}]
-            const testObj  = (Array.isArray(valuesArr) && valuesArr[0]) ? valuesArr[0] : {};
+            let testObj;
+            if (Array.isArray(valuesArr) && valuesArr[0]) {
+                testObj = valuesArr[0];
+            } else {
+                testObj = {};
+            }
             const rawValue = testObj[fieldName];   // puede ser null, '', string, number
 
             // Determinar si el campo es de tipo file
-            const htmlTag  = fieldDef.html ? fieldDef.html.tag : 'input';
-            const htmlType = fieldDef.html ? fieldDef.html.type : 'text';
+            let htmlTag;
+            if (fieldDef.html) {
+                htmlTag = fieldDef.html.tag;
+            } else {
+                htmlTag = 'input';
+            }
+            
+            let htmlType;
+            if (fieldDef.html) {
+                htmlType = fieldDef.html.type;
+            } else {
+                htmlType = 'text';
+            }
             const isFile   = (htmlTag === 'file' || htmlType === 'file');
 
             // Obtener validaciones de la estructura para este campo y acción
-            const validations = (fieldDef.rules && fieldDef.rules.validations && fieldDef.rules.validations[action])
-                ? fieldDef.rules.validations[action]
-                : {};
+            let validations;
+            if (fieldDef.rules && fieldDef.rules.validations && fieldDef.rules.validations[action]) {
+                validations = fieldDef.rules.validations[action];
+            } else {
+                validations = {};
+            }
 
             // Determinar si el campo es nullable en esta acción (is_null)
             const isNullDef = fieldDef.db ? fieldDef.db.is_null : {};
@@ -219,14 +247,27 @@ class TestForm {
             // Comparar: expectedResult===true -> esperamos sin error; string -> esperamos error
             const expectedError = expectedResult !== true;
             const gotError      = actualResult !== true;
-            const passed        = expectedError === gotError;
+            
+            let passed;
+            if (expectedError === gotError) {
+                passed = true;
+            } else {
+                passed = false;
+            }
 
+            let message;
+            if (actualResult !== true) {
+                message = String(actualResult);
+            } else {
+                message = 'OK';
+            }
+            
             return {
                 pruebaNum, defTestNum, testDescription, fieldName, action,
                 testValue: rawValue,
                 expectedResult, actualResult,
                 passed,
-                message: actualResult !== true ? String(actualResult) : 'OK'
+                message: message
             };
         } catch (err) {
             return {
@@ -252,7 +293,12 @@ class TestForm {
             document.body.appendChild(container);
         }
 
-        const value = (rawValue === null || rawValue === undefined) ? '' : String(rawValue);
+        let value;
+        if (rawValue === null || rawValue === undefined) {
+            value = '';
+        } else {
+            value = String(rawValue);
+        }
 
         if (htmlTag === 'textarea') {
             container.innerHTML = `<textarea id="${elementId}">${value}</textarea>`;
@@ -285,7 +331,13 @@ class TestForm {
         // Si vacío y nullable, no seguir validando formato/tamaño
         const element = document.getElementById(elementId);
         if (!element) return true;
-        const val = element.value !== undefined ? element.value.trim() : '';
+        
+        let val;
+        if (element.value !== undefined) {
+            val = element.value.trim();
+        } else {
+            val = '';
+        }
         if (val === '') return true;
 
         // 2. integer (dígitos)
@@ -346,7 +398,15 @@ class TestForm {
     validateFileValue(rawValue, testObj, validations, isNullable, action) {
         // Comprobar no_file (campo vacío / fichero no seleccionado)
         if (rawValue === null || rawValue === undefined) {
-            const fileRequired = validations.no_file || (!isNullable && (action === 'ADD' || action === 'EDIT'));
+            let fileRequired;
+            if (validations.no_file) {
+                fileRequired = true;
+            } else if (!isNullable && (action === 'ADD' || action === 'EDIT')) {
+                fileRequired = true;
+            } else {
+                fileRequired = false;
+            }
+            
             if (fileRequired) {
                 return 'No se ha seleccionado ningún fichero';
             }
@@ -462,11 +522,22 @@ class TestForm {
         } else {
             const byAttr = Object.entries(d.byAttribute || {})
                 .map(([k, v]) => `<li>${k}: ${v}</li>`).join('');
+            
+            let byAttrHtml = '';
+            if (byAttr) {
+                byAttrHtml = `<p><strong>Por atributo:</strong></p><ul style="padding-left:20px">${byAttr}</ul>`;
+            }
+            
+            let issuesHtml = '';
+            if (d.issues && d.issues.length) {
+                issuesHtml = `<p style="color:#ff9800;">Problemas: ${d.issues.join(' | ')}</p>`;
+            }
+            
             sec.innerHTML += `
                 <p><strong>Total definiciones:</strong> ${d.count}</p>
                 <p><strong>Bien definidas:</strong> ${d.wellDefined} / ${d.count}</p>
-                ${byAttr ? `<p><strong>Por atributo:</strong></p><ul style="padding-left:20px">${byAttr}</ul>` : ''}
-                ${d.issues && d.issues.length ? `<p style="color:#ff9800;">Problemas: ${d.issues.join(' | ')}</p>` : ''}`;
+                ${byAttrHtml}
+                ${issuesHtml}`;
         }
         return sec;
     }
@@ -476,18 +547,28 @@ class TestForm {
         if (d.error) {
             sec.innerHTML += `<p style="color:#f44336;">❌ ${d.error}</p>`;
         } else {
+            let issuesHtml = '';
+            if (d.issues && d.issues.length) {
+                issuesHtml = `<p style="color:#ff9800;">Problemas: ${d.issues.join(' | ')}</p>`;
+            }
+            
             sec.innerHTML += `
                 <p><strong>Total pruebas:</strong> ${d.count}</p>
                 <p><strong>Bien tipificadas:</strong> ${d.wellTyped} / ${d.count}</p>
                 <p><strong>Prueban error:</strong> ${d.byType.error}</p>
                 <p><strong>Prueban éxito:</strong> ${d.byType.success}</p>
-                ${d.issues && d.issues.length ? `<p style="color:#ff9800;">Problemas: ${d.issues.join(' | ')}</p>` : ''}`;
+                ${issuesHtml}`;
         }
         return sec;
     }
 
     buildExecutionSection(e) {
-        const pct = e.executed ? Math.round(e.correct / e.executed * 100) : 0;
+        let pct;
+        if (e.executed) {
+            pct = Math.round(e.correct / e.executed * 100);
+        } else {
+            pct = 0;
+        }
         const sec = this.buildSection('Resultados de Ejecución');
         sec.innerHTML += `
             <p><strong>Pruebas ejecutadas:</strong> ${e.executed}</p>
@@ -532,15 +613,56 @@ class TestForm {
             const row = document.createElement('tr');
             row.style.borderBottom = '1px solid #e0e0e0';
             if (!r.passed) row.style.backgroundColor = '#fff3f3';
-            const color  = r.passed ? '#4caf50' : '#f44336';
-            const status = r.passed ? '✓ OK' : '✗ FALLO';
-            const expected = r.expectedResult === true ? 'Éxito' : `Error (${r.expectedResult})`;
-            const obtained = r.actualResult  === true ? 'Éxito' : `Error: ${r.message}`;
+            
+            let color;
+            if (r.passed) {
+                color = '#4caf50';
+            } else {
+                color = '#f44336';
+            }
+            
+            let status;
+            if (r.passed) {
+                status = '✓ OK';
+            } else {
+                status = '✗ FALLO';
+            }
+            
+            let expected;
+            if (r.expectedResult === true) {
+                expected = 'Éxito';
+            } else {
+                expected = `Error (${r.expectedResult})`;
+            }
+            
+            let obtained;
+            if (r.actualResult === true) {
+                obtained = 'Éxito';
+            } else {
+                obtained = `Error: ${r.message}`;
+            }
+            let pruebaNum = r.pruebaNum;
+            if (pruebaNum === undefined || pruebaNum === null) {
+                pruebaNum = '';
+            }
+            let fieldName = r.fieldName;
+            if (fieldName === undefined || fieldName === null) {
+                fieldName = '';
+            }
+            let testDescription = r.testDescription;
+            if (testDescription === undefined || testDescription === null) {
+                testDescription = '';
+            }
+            let action = r.action;
+            if (action === undefined || action === null) {
+                action = '';
+            }
+            
             row.innerHTML = `
-                <td style="padding:8px;text-align:center;">${r.pruebaNum ?? ''}</td>
-                <td style="padding:8px;font-family:monospace;font-size:11px;">${r.fieldName ?? ''}</td>
-                <td style="padding:8px;">${r.testDescription ?? ''}</td>
-                <td style="padding:8px;text-align:center;">${r.action ?? ''}</td>
+                <td style="padding:8px;text-align:center;">${pruebaNum}</td>
+                <td style="padding:8px;font-family:monospace;font-size:11px;">${fieldName}</td>
+                <td style="padding:8px;">${testDescription}</td>
+                <td style="padding:8px;text-align:center;">${action}</td>
                 <td style="padding:8px;text-align:center;">${expected}</td>
                 <td style="padding:8px;">${obtained}</td>
                 <td style="padding:8px;text-align:center;color:${color};font-weight:bold;">${status}</td>`;

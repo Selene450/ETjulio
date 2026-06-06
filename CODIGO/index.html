@@ -8,7 +8,6 @@
     
     <!-- Scripts de configuración -->
     <script src="menu_entidades.js"></script>
-    <script src="Julio_Datos_AnaAlvarezLopez.js"></script>
     
     <!-- Scripts de estructuras de entidades -->
     <script src="characteristic/characteristic_estructura.js"></script>
@@ -66,8 +65,7 @@
     <!-- Pie de página -->
     <footer>
         <div class="footer-content">
-            <p>Alumno: <span id="studentName"></span> | DNI: <span id="studentDNI"></span> | Horas: <span id="studentHours"></span></p>
-            <p>&copy; 2026 Sistema de Pruebas de Entidades. Todos los derechos reservados.</p>
+            <p>2026 Sistema de Pruebas de Entidades. Interfaces de Usuario</p>
         </div>
     </footer>
 
@@ -95,12 +93,6 @@
         });
 
         function initializeApp() {
-            // Mostrar información del alumno
-            if (typeof info_entrega !== 'undefined' && Array.isArray(info_entrega)) {
-                document.getElementById('studentName').textContent = info_entrega[2];
-                document.getElementById('studentDNI').textContent = info_entrega[1];
-                document.getElementById('studentHours').textContent = info_entrega[3];
-            }
 
             // Construir menú de entidades
             if (typeof menu_entidades !== 'undefined' && Array.isArray(menu_entidades)) {

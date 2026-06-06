@@ -24,6 +24,10 @@ window.analysis_preparation_estructura = {
                         exp_reg: '^[0-9]+$',
                         min_size: 1,
                         max_size: 11
+                    },
+                    SEARCH: {
+                        exp_reg: '^[0-9]+$',
+                        max_size: 11
                     }
                 }
             }
