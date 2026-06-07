@@ -9,6 +9,7 @@ class TestSubmit {
         this.estructura = gestor.getStructure();
         // Formato: [entity, action, num, description, {fields...}, expectedResult]
         this.testSubmitData = gestor.getTestSubmit();
+        this.entityClass = gestor.getEntityClass();
     }
 
     /**
@@ -131,7 +132,7 @@ class TestSubmit {
             if (isFile) {
                 result = this.validateFileValue(fieldName, rawValue, formData, validations, isNullable, normalizedAction);
             } else {
-                result = this.validateFieldValue(fieldName, rawValue, validations, isNullable, normalizedAction);
+                result = this.validateFieldValue(fieldName, rawValue, validations, isNullable, normalizedAction, formData);
             }
 
             if (result !== true) return result;
@@ -145,7 +146,7 @@ class TestSubmit {
         return map[action.toUpperCase()] || action.toUpperCase();
     }
 
-    validateFieldValue(fieldName, rawValue, validations, isNullable, action) {
+    validateFieldValue(fieldName, rawValue, validations, isNullable, action, formData) {
         const strVal = (rawValue === null || rawValue === undefined) ? '' : String(rawValue);
         const empty  = strVal.trim() === '';
 
@@ -180,6 +181,19 @@ class TestSubmit {
             if (r !== true) return `${fieldName}: ${r}`;
         }
 
+        // personalized
+        if (validations.personalized && this.entityClass && fieldName) {
+            const method = `${fieldName}_personalized_validation`;
+            if (typeof this.entityClass[method] === 'function') {
+                try {
+                    const r = this.entityClass[method](strVal, formData);
+                    if (r !== true) return r;
+                } catch (e) {
+                    return `Error validación personalizada: ${e.message}`;
+                }
+            }
+        }
+
         return true;
     }
 
@@ -187,7 +201,7 @@ class TestSubmit {
         const empty = rawValue === null || rawValue === undefined;
 
         if (empty) {
-            if (validations.no_file || (!isNullable && (action === 'ADD' || action === 'EDIT'))) {
+            if (validations.no_file || (!isNullable && action === 'ADD')) {
                 return `${fieldName}: No se ha seleccionado ningún fichero`;
             }
             return true;

@@ -123,11 +123,11 @@ class Validations {
         const value = element.value ? element.value.trim() : '';
         if (value === '') return true;
         
-        if (!/^\d{2}-\d{2}-\d{4}$/.test(value)) {
-            return 'Formato debe ser DD-MM-YYYY';
+        if (!/^\d{2}\/\d{2}\/\d{4}$/.test(value)) {
+            return 'Formato debe ser DD/MM/YYYY';
         }
 
-        const [day, month, year] = value.split('-').map(Number);
+        const [day, month, year] = value.split('/').map(Number);
         const date = new Date(year, month - 1, day);
         
         if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {

@@ -159,24 +159,24 @@ window.project_pruebas = [
   ['project', 'name_project', 19, 19, 'SEARCH', [{name_project: 'a'.repeat(101)}], 'name_max_size_KO'],
  
   // ===== START_DATE_PROJECT =====
-  ['project', 'start_date_project', 20, 20, 'ADD', [{start_date_project: '15-03-2023'}], true],
+  ['project', 'start_date_project', 20, 20, 'ADD', [{start_date_project: '15/03/2023'}], true],
   ['project', 'start_date_project', 21, 21, 'ADD', [{start_date_project: ''}], 'start_date_required'],
   ['project', 'start_date_project', 22, 22, 'ADD', [{start_date_project: '2023-03-15'}], 'start_date_format_KO'],
-  ['project', 'start_date_project', 23, 23, 'EDIT', [{id_project: '789', start_date_project: '20-03-2023'}], true],
+  ['project', 'start_date_project', 23, 23, 'EDIT', [{id_project: '789', start_date_project: '20/03/2023'}], true],
   ['project', 'start_date_project', 24, 24, 'EDIT', [{id_project: '789', start_date_project: ''}], 'start_date_required'],
   ['project', 'start_date_project', 25, 25, 'EDIT', [{id_project: '789', start_date_project: '2023-03-15'}], 'start_date_format_KO'],
-  ['project', 'start_date_project', 26, 26, 'SEARCH', [{start_date_project: '15-03-2023'}], true],
+  ['project', 'start_date_project', 26, 26, 'SEARCH', [{start_date_project: '15/03/2023'}], true],
  
   // ===== END_DATE_PROJECT =====
-  ['project', 'end_date_project', 27, 27, 'ADD', [{start_date_project: '15-03-2023', end_date_project: '30-12-2024'}], true],
-  ['project', 'end_date_project', 28, 28, 'ADD', [{start_date_project: '15-03-2023', end_date_project: ''}], 'end_date_required'],
-  ['project', 'end_date_project', 29, 29, 'ADD', [{start_date_project: '15-03-2023', end_date_project: '2024-12-30'}], 'end_date_format_KO'],
-  ['project', 'end_date_project', 30, 30, 'ADD', [{start_date_project: '15-03-2023', end_date_project: '01-01-2023'}], 'end_date_before_start_KO'],
-  ['project', 'end_date_project', 31, 31, 'EDIT', [{id_project: '789', start_date_project: '15-03-2023', end_date_project: '31-12-2024'}], true],
-  ['project', 'end_date_project', 32, 32, 'EDIT', [{id_project: '789', start_date_project: '15-03-2023', end_date_project: ''}], 'end_date_required'],
-  ['project', 'end_date_project', 33, 33, 'EDIT', [{id_project: '789', start_date_project: '15-03-2023', end_date_project: '2024-12-30'}], 'end_date_format_KO'],
-  ['project', 'end_date_project', 34, 34, 'EDIT', [{id_project: '789', start_date_project: '15-03-2023', end_date_project: '01-01-2023'}], 'end_date_before_start_KO'],
-  ['project', 'end_date_project', 35, 35, 'SEARCH', [{end_date_project: '30-12-2024'}], true],
+  ['project', 'end_date_project', 27, 27, 'ADD', [{start_date_project: '15/03/2023', end_date_project: '30/12/2024'}], true],
+  ['project', 'end_date_project', 28, 28, 'ADD', [{start_date_project: '15/03/2023', end_date_project: ''}], 'end_date_required'],
+  ['project', 'end_date_project', 29, 29, 'ADD', [{start_date_project: '15/03/2023', end_date_project: '2024-12-30'}], 'end_date_format_KO'],
+  ['project', 'end_date_project', 30, 30, 'ADD', [{start_date_project: '15/03/2023', end_date_project: '01/01/2023'}], 'end_date_before_start_KO'],
+  ['project', 'end_date_project', 31, 31, 'EDIT', [{id_project: '789', start_date_project: '15/03/2023', end_date_project: '31/12/2024'}], true],
+  ['project', 'end_date_project', 32, 32, 'EDIT', [{id_project: '789', start_date_project: '15/03/2023', end_date_project: ''}], 'end_date_required'],
+  ['project', 'end_date_project', 33, 33, 'EDIT', [{id_project: '789', start_date_project: '15/03/2023', end_date_project: '2024-12-30'}], 'end_date_format_KO'],
+  ['project', 'end_date_project', 34, 34, 'EDIT', [{id_project: '789', start_date_project: '15/03/2023', end_date_project: '01/01/2023'}], 'end_date_before_start_KO'],
+  ['project', 'end_date_project', 35, 35, 'SEARCH', [{end_date_project: '30/12/2024'}], true],
  
   // ===== RESPONSABLE_PROJECT =====
   ['project', 'responsable_project', 36, 36, 'ADD', [{responsable_project: 'Dr Fisher'}], true],
@@ -269,9 +269,3 @@ window.project_pruebas = [
   ['project', 'id_sampling_methodology_project', 111, 111, 'EDIT', [{id_project: '789', id_sampling_methodology_project: ''}], 'sampling_required'],
   ['project', 'id_sampling_methodology_project', 112, 112, 'EDIT', [{id_project: '789', id_sampling_methodology_project: 'abc'}], 'sampling_format_KO']
 ];
- 
- 
- 
-
- 
- 

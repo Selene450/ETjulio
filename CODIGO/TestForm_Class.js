@@ -241,7 +241,7 @@ class TestForm {
             if (isFile) {
                 actualResult = this.validateFileValue(rawValue, testObj, validations, isNullable, action);
             } else {
-                actualResult = this.validateTextValue(fieldName, rawValue, validations, isNullable, index, htmlTag, action);
+                actualResult = this.validateTextValue(fieldName, rawValue, validations, isNullable, index, htmlTag, action, testObj);
             }
 
             // Comparar: expectedResult===true -> esperamos sin error; string -> esperamos error
@@ -282,7 +282,7 @@ class TestForm {
     //  VALIDACIÓN DE CAMPOS TEXTO / NUMBER / DATE / SELECT
     // ─────────────────────────────────────────────────────
 
-    validateTextValue(fieldName, rawValue, validations, isNullable, index, htmlTag, action) {
+    validateTextValue(fieldName, rawValue, validations, isNullable, index, htmlTag, action, testObj) {
         // Construir elemento temporal en el DOM
         const elementId = `__tf_${index}`;
         let container = document.getElementById('__tf_container__');
@@ -312,7 +312,7 @@ class TestForm {
             container.innerHTML = `<input id="${elementId}" value="${safe}">`;
         }
 
-        const result = this.runValidations(elementId, validations, isNullable, rawValue, action, fieldName);
+        const result = this.runValidations(elementId, validations, isNullable, rawValue, action, fieldName, testObj);
         container.innerHTML = '';
         return result;
     }
@@ -320,7 +320,7 @@ class TestForm {
     /**
      * Ejecuta todas las validaciones definidas en la estructura sobre un elementId del DOM
      */
-    runValidations(elementId, validations, isNullable, rawValue, action, fieldName) {
+    runValidations(elementId, validations, isNullable, rawValue, action, fieldName, context) {
         // 1. required: campo NOT NULL y acción es ADD o EDIT (en SEARCH no se exige rellenar)
         const requireCheck = !isNullable && (action === 'ADD' || action === 'EDIT');
         if (requireCheck) {
@@ -379,7 +379,7 @@ class TestForm {
             const method = `${fieldName}_personalized_validation`;
             if (typeof this.entityClass[method] === 'function') {
                 try {
-                    return this.entityClass[method](val);
+                    return this.entityClass[method](val, context);
                 } catch (e) {
                     return `Error validación personalizada: ${e.message}`;
                 }
@@ -401,7 +401,7 @@ class TestForm {
             let fileRequired;
             if (validations.no_file) {
                 fileRequired = true;
-            } else if (!isNullable && (action === 'ADD' || action === 'EDIT')) {
+            } else if (!isNullable && action === 'ADD') {
                 fileRequired = true;
             } else {
                 fileRequired = false;
