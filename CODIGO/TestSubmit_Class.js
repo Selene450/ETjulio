@@ -291,7 +291,7 @@ class TestSubmit {
         btnSec.style.cssText = 'padding:15px;text-align:center;background:#f5f5f5;';
         const btn = document.createElement('button');
         btn.textContent = 'Ver Detalles de Pruebas de Submit';
-        btn.style.cssText = 'padding:10px 20px;background:#667eea;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px;';
+        btn.className = 'btn-primary';
         btn.onclick = () => this.showDetailedResults(allResults);
         btnSec.appendChild(btn);
         content.appendChild(btnSec);
@@ -308,7 +308,7 @@ class TestSubmit {
             if (!results || results.length === 0) continue;
             const sec = document.createElement('div');
             sec.style.padding = '10px 15px';
-            sec.innerHTML = `<h3 style="color:#667eea;">${action}</h3>`;
+            sec.innerHTML = `<h3${action}</h3>`;
 
             const table = document.createElement('table');
             table.style.cssText = 'width:100%;border-collapse:collapse;font-size:13px;margin-bottom:20px;';

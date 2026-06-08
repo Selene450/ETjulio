@@ -88,34 +88,6 @@ class Gestor {
                 </button>
             </div>
         `;
-
-        // Agregar estilos adicionales
-        this.addEntityStyles();
-    }
-
-    /**
-     * Agrega estilos específicos para la visualización de entidad
-     */
-    addEntityStyles() {
-        const style = document.createElement('style');
-        style.textContent = `
-            .entity-header {
-                margin-bottom: 30px;
-                padding-bottom: 20px;
-                border-bottom: 2px solid #667eea;
-            }
-            .entity-header h2 {
-                color: #667eea;
-                font-size: 24px;
-                text-transform: capitalize;
-                margin-bottom: 5px;
-            }
-            .entity-description {
-                color: #999;
-                font-size: 14px;
-            }
-        `;
-        document.head.appendChild(style);
     }
 
     /**

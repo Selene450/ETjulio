@@ -1,6 +1,13 @@
 /* ==========================================
    RESET Y ESTILOS BASE
    ========================================== */
+:root {
+    --light-color: #F5F5F5;
+    --medium-color: #F8E7F6;
+    --dark-color: #0E2C31;
+    --emphasis-color-1: #4B164C;
+    --emphasis-color-2: #DD88CF;
+}
 
 * {
     margin: 0;
@@ -8,15 +15,16 @@
     box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
     width: 100%;
     height: 100%;
 }
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: #333;
-    background-color: #f5f5f5;
+    color: var(--dark-color);
+    background: var(--light-color);
     line-height: 1.6;
 }
 
@@ -37,10 +45,9 @@ body {
    ========================================== */
 
 header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: var(--emphasis-color-1);
+    color: var(--light-color);
     padding: 20px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     grid-column: 1;
     grid-row: 1;
 }
@@ -65,35 +72,36 @@ header h1 {
 }
 
 .api-icon:hover {
-    transform: scale(1.1);
+    transform: scale(1.5);
 }
 
 /* ==========================================
-   ÁREA PRINCIPAL (CONTENEDOR DE TRABAJO)
+   ÁREA PRINCIPAL
    ========================================== */
 
 main {
-    display: grid;
-    grid-template-columns: 250px 1fr;
-    gap: 0;
+    display: flex;
+    flex-direction: column;
     grid-column: 1;
     grid-row: 2;
+    height: 100%;
+    /* Para que el work-area ocupe el resto */
 }
 
 /* ==========================================
-   MENÚ LATERAL
+   MENÚ DE NAVEGACIÓN (HORIZONTAL)
    ========================================== */
 
 nav {
-    background-color: #ffffff;
-    border-right: 1px solid #ddd;
-    overflow-y: auto;
+    background-color: var(--emphasis-color-2);
+    border-bottom: 2px solid var(--medium-color);
+    /* Ya no lleva border-right */
 }
 
 .menu-toggle {
     display: none;
-    background: #667eea;
-    color: white;
+    background: var(--emphasis-color-1);
+    color: var(--light-color);
     border: none;
     padding: 10px 15px;
     cursor: pointer;
@@ -103,51 +111,75 @@ nav {
 }
 
 .menu-toggle:hover {
-    background: #764ba2;
+    background: var(--emphasis-color-2);
 }
 
+/* El contenedor principal alinea el título y el grupo de botones */
 .menu-container {
-    padding: 15px;
-}
-
-.menu-section {
-    margin-bottom: 20px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0 20px;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .menu-section-title {
     font-weight: 600;
-    color: #667eea;
-    padding: 10px;
-    font-size: 12px;
+    color: var(--emphasis-color-1);
+    padding: 15px 20px 15px 0;
+    font-size: 14px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    white-space: nowrap;
+    /* Evita que el título se parta en dos líneas */
 }
 
+/* El contenedor de las opciones del menú (Inyectado por JS) */
+.menu-items {
+    display: flex;
+    flex-direction: row;
+    /* Fila horizontal */
+    flex-wrap: wrap;
+    /* Si hay muchas opciones, saltan a la línea de abajo */
+    gap: 5px;
+    /* Espacio entre botones */
+}
+
+/* Cada una de las opciones ("Analysis preparation", etc.) */
 .menu-item {
-    display: block;
-    padding: 12px 15px;
-    color: #555;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 18px;
+    color: var(--dark-color);
     text-decoration: none;
-    border-left: 3px solid transparent;
-    transition: all 0.3s ease;
+    border-bottom: 3px solid transparent;
+    /* Indicador en la parte inferior */
+    transition: all 0.2s ease;
     cursor: pointer;
     user-select: none;
-    background-color: #f9f9f9;
-    margin-bottom: 5px;
+    background-color: transparent;
     font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 0;
+    /* Quitamos el margen inferior que las apilaba */
 }
 
 .menu-item:hover {
-    background-color: #e8e8f5;
-    border-left-color: #667eea;
-    color: #667eea;
+    border-bottom-color: var(--emphasis-color-1);
+    color: var(--emphasis-color-1);
+    background-color: rgba(255, 255, 255, 0.3);
+    /* Un leve resalte al pasar el ratón */
 }
 
 .menu-item.active {
-    background-color: #e8e8f5;
-    border-left-color: #667eea;
-    color: #667eea;
+    background-color: var(--emphasis-color-1);
+    border-bottom-color: var(--dark-color);
+    color: var(--light-color);
     font-weight: 600;
+    border-radius: 4px 4px 0 0;
+    /* Bordes redondeados sutiles arriba */
 }
 
 /* ==========================================
@@ -155,7 +187,7 @@ nav {
    ========================================== */
 
 .work-area {
-    background-color: #ffffff;
+    background-color: var(--light-color);
     padding: 30px;
     overflow-y: auto;
 }
@@ -166,18 +198,18 @@ nav {
 
 .entity-header {
     margin-bottom: 30px;
-    border-bottom: 2px solid #667eea;
+    border-bottom: 2px solid var(--emphasis-color-2);
     padding-bottom: 20px;
 }
 
 .entity-header h2 {
-    color: #667eea;
+    color: var(--emphasis-color-1);
     font-size: 28px;
     margin-bottom: 10px;
 }
 
 .entity-description {
-    color: #777;
+    color: var(--dark-color);
     font-size: 14px;
 }
 
@@ -193,7 +225,7 @@ nav {
 
 .btn-entity {
     padding: 20px;
-    border: 2px solid #ddd;
+    border: 2px solid var(--medium-color);
     background-color: #fff;
     border-radius: 8px;
     cursor: pointer;
@@ -201,12 +233,14 @@ nav {
     font-weight: 600;
     transition: all 0.3s ease;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    color: var(--dark-color);
 }
 
 .btn-entity:hover {
-    border-color: #667eea;
-    color: #667eea;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+    border-color: var(--emphasis-color-2);
+    color: var(--emphasis-color-1);
+    box-shadow: 0 4px 12px rgba(221, 136, 207, 0.3);
+    /* Sombra basada en emphasis-color-2 */
     transform: translateY(-2px);
 }
 
@@ -224,7 +258,8 @@ nav {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(14, 44, 49, 0.7);
+    /* Sombra basada en dark-color */
     display: none;
     justify-content: center;
     align-items: center;
@@ -240,13 +275,14 @@ nav {
     from {
         opacity: 0;
     }
+
     to {
         opacity: 1;
     }
 }
 
 .modal-content {
-    background-color: white;
+    background-color: #fff;
     border-radius: 8px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
     max-width: 800px;
@@ -260,6 +296,7 @@ nav {
         transform: translateY(20px);
         opacity: 0;
     }
+
     to {
         transform: translateY(0);
         opacity: 1;
@@ -267,8 +304,8 @@ nav {
 }
 
 .modal-header {
-    background-color: #667eea;
-    color: white;
+    background-color: var(--emphasis-color-1);
+    color: var(--light-color);
     padding: 20px;
     display: flex;
     justify-content: space-between;
@@ -286,20 +323,21 @@ nav {
     font-weight: bold;
     cursor: pointer;
     transition: all 0.3s ease;
+    color: var(--medium-color);
 }
 
 .close-btn:hover {
     transform: rotate(90deg);
-    color: #ffcccc;
+    color: var(--light-color);
 }
 
 .modal-section {
     padding: 20px;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid var(--medium-color);
 }
 
 .modal-section h3 {
-    color: #667eea;
+    color: var(--emphasis-color-1);
     margin-bottom: 15px;
     font-size: 18px;
 }
@@ -307,6 +345,7 @@ nav {
 .modal-section p {
     margin: 10px 0;
     font-size: 14px;
+    color: var(--dark-color);
 }
 
 /* ==========================================
@@ -321,7 +360,7 @@ nav {
     display: block;
     font-weight: 600;
     margin-bottom: 8px;
-    color: #333;
+    color: var(--dark-color);
     font-size: 14px;
 }
 
@@ -330,19 +369,22 @@ nav {
 .form-group select {
     width: 100%;
     padding: 10px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--medium-color);
     border-radius: 4px;
     font-family: inherit;
     font-size: 14px;
     transition: all 0.3s ease;
+    background-color: var(--light-color);
+    color: var(--dark-color);
 }
 
 .form-group input:focus,
 .form-group textarea:focus,
 .form-group select:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 8px rgba(102, 126, 234, 0.3);
+    border-color: var(--emphasis-color-2);
+    box-shadow: 0 0 8px rgba(221, 136, 207, 0.4);
+    /* Sombra basada en emphasis-color-2 */
 }
 
 .form-group textarea {
@@ -362,21 +404,22 @@ table {
 }
 
 table th {
-    background-color: #f5f5f5;
+    background-color: var(--medium-color);
     padding: 12px;
     text-align: left;
     font-weight: 600;
-    border-bottom: 2px solid #ddd;
-    color: #333;
+    border-bottom: 2px solid var(--emphasis-color-2);
+    color: var(--emphasis-color-1);
 }
 
 table td {
     padding: 10px 12px;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid var(--medium-color);
+    color: var(--dark-color);
 }
 
 table tr:hover {
-    background-color: #f9f9f9;
+    background-color: var(--medium-color);
 }
 
 /* ==========================================
@@ -384,8 +427,8 @@ table tr:hover {
    ========================================== */
 
 footer {
-    background-color: #333;
-    color: #aaa;
+    background-color: var(--dark-color);
+    color: var(--medium-color);
     text-align: center;
     padding: 20px;
     font-size: 12px;
@@ -398,7 +441,7 @@ footer p {
 }
 
 /* ==========================================
-   UTILIDADES Y ESTADOS
+   UTILIDADES Y ESTADOS (Sin cambios, paleta estándar)
    ========================================== */
 
 .error {
@@ -462,23 +505,26 @@ button:active {
 }
 
 .btn-primary {
-    background-color: #667eea;
-    color: white;
+    background-color: var(--emphasis-color-1);
+    color: var(--light-color);
 }
 
 .btn-primary:hover {
-    background-color: #764ba2;
+    background-color: var(--emphasis-color-2);
+    color: var(--dark-color);
 }
 
 .btn-secondary {
-    background-color: #e0e0e0;
-    color: #333;
+    background-color: var(--medium-color);
+    color: var(--dark-color);
 }
 
 .btn-secondary:hover {
-    background-color: #d5d5d5;
+    background-color: var(--emphasis-color-2);
+    color: var(--emphasis-color-1);
 }
 
+/* Dejamos los botones danger/success con sus colores semánticos */
 .btn-danger {
     background-color: #f44336;
     color: white;
@@ -508,7 +554,7 @@ button:active {
 
     nav {
         border-right: none;
-        border-bottom: 1px solid #ddd;
+        border-bottom: 1px solid var(--medium-color);
     }
 
     .menu-toggle {
@@ -563,4 +609,155 @@ button:active {
     table td {
         padding: 6px;
     }
+
+   
 }
+
+ /*==========================================
+    ESTILOS EXCLUSIVOS PARA LA API.html
+    ==========================================*/
+
+    /* Desactivamos el Grid global para que la página fluya de arriba a abajo */
+    body.api-page {
+        display: block;
+        height: auto;
+        min-height: 100vh;
+        background-color: #f8f9fa;
+        /* Un fondo gris claro muy limpio para leer */
+    }
+
+    /* Encabezado superior */
+    .api-page .api-header {
+        background: linear-gradient(135deg, var(--emphasis-color-1), #6b266c);
+        /* Degradado elegante */
+        color: var(--light-color);
+        padding: 50px 20px;
+        text-align: center;
+        box-shadow: inset 0 -5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .api-page .api-header h1 {
+        font-size: 34px;
+        font-weight: 700;
+        margin-bottom: 10px;
+        letter-spacing: -0.5px;
+    }
+
+    .api-page .api-header p {
+        font-size: 16px;
+        opacity: 0.9;
+    }
+
+    /* Barra de navegación pegajosa (Sticky Nav) */
+    .api-page .api-nav {
+        background-color: var(--medium-color);
+        border-bottom: 2px solid var(--emphasis-color-2);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .api-page .api-nav ul {
+        list-style: none;
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        flex-wrap: wrap;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 12px 20px;
+    }
+
+    .api-page .api-nav a {
+        color: var(--dark-color);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 6px 12px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+    }
+
+    .api-page .api-nav a:hover {
+        background-color: var(--emphasis-color-2);
+        color: var(--emphasis-color-1);
+    }
+
+    /* Contenedor del contenido */
+    .api-page .api-container {
+        max-width: 95%;
+        /* Ahora se adaptará a pantallas anchas */
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+
+    /* Secciones / Tarjetas de información */
+    .api-page .api-section {
+        background: #ffffff;
+        padding: 35px;
+        margin-bottom: 35px;
+        border-radius: 10px;
+        border: 1px solid rgba(221, 136, 207, 0.2);
+        /* Borde sutil con emphasis-color-2 */
+        box-shadow: 0 4px 12px rgba(14, 44, 49, 0.03);
+    }
+
+    /* Títulos dentro de las secciones */
+    .api-page .api-section h2 {
+        color: var(--emphasis-color-1);
+        font-size: 24px;
+        border-bottom: 2px solid var(--medium-color);
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
+
+    .api-page .api-section h3 {
+        color: var(--emphasis-color-1);
+        font-size: 16px;
+        margin-top: 30px;
+        margin-bottom: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .api-page .api-section p {
+        color: #4a5568;
+        font-size: 15px;
+        line-height: 1.7;
+        margin-bottom: 15px;
+    }
+
+    /* Bloques de Código Fuente */
+    /* Bloques de Código Fuente y Diagramas ASCII */
+    .api-page .code-block {
+        background-color: #1a202c;
+        color: #edf2f7;
+        padding: 20px;
+        border-radius: 8px;
+        /* Fuente estrictamente monoespaciada clásica */
+        font-family: Consolas, 'Courier New', monospace;
+        font-size: 13px;
+        line-height: 1.2;
+        /* Interlineado reducido para que las líneas verticales conecten */
+        white-space: pre;
+        /* Prohíbe que el texto salte de línea y rompa el dibujo */
+        overflow-x: auto;
+        /* Añade una barra de desplazamiento horizontal si el diagrama es gigante */
+        margin: 15px 0 25px 0;
+        border-left: 4px solid var(--emphasis-color-2);
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Ajuste específico para listas de texto si las hubiera */
+    .api-page .api-section ul {
+        margin-left: 20px;
+        margin-bottom: 15px;
+        color: #4a5568;
+    }
+
+    .api-page .api-section li {
+        margin-bottom: 5px;
+    }

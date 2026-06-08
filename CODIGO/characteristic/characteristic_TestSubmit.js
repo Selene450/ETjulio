@@ -1,7 +1,7 @@
 // CHARACTERISTIC - Tests de envío de formulario (reorganizado: ADD + EDIT + SEARCH + DELETE + READ)
 
 window.characteristic_TestSubmit = [
-  // ===== ADD (ADD) TESTS =====
+  // ===== ADD TESTS =====
   ['characteristic', 'ADD', 1, 'Crear characteristic válido', {id_characteristic: '1', name_characteristic: 'Physical Property', description_characteristic: 'Refers to the physical characteristics of soil samples such as texture particle size and structure', data_type_characteristic: 'text', category_characteristic: 'soil_site', bibref_characteristic: 'USDA Technical Note 1234', file_characteristic: 'characteristicsRef.pdf'}, true],
   ['characteristic', 'ADD', 2, 'Crear sin ID', {name_characteristic: 'Chemical Element', description_characteristic: 'Chemical elements present in soil matrices analyzed using XRF and spectroscopy methods', data_type_characteristic: 'set', category_characteristic: 'soil_chem', bibref_characteristic: 'ISO 11565 2019', file_characteristic: 'chemicalRef.doc'}, 'id_required'],
   ['characteristic', 'ADD', 3, 'Crear sin nombre', {id_characteristic: '2', description_characteristic: 'Biological content and microorganism indicators in soil samples', data_type_characteristic: 'set', category_characteristic: 'soil_chem', bibref_characteristic: 'EPA Method 1664', file_characteristic: 'biologyRef.docx'}, 'name_required'],
@@ -12,7 +12,7 @@ window.characteristic_TestSubmit = [
   ['characteristic', 'ADD', 8, 'Crear sin archivo', {id_characteristic: '7', name_characteristic: 'Cation Exchange Capacity', description_characteristic: 'CEC measured using ammonium acetate method expressed in meq per one hundred grams of soil', data_type_characteristic: 'set', category_characteristic: 'soil_chem', bibref_characteristic: 'ISO 23470 2011 Method', file_characteristic: ''}, 'file_required'],
   ['characteristic', 'ADD', 9, 'Crear con todos los valores válidos', {id_characteristic: '9', name_characteristic: 'Soil Texture Classes', description_characteristic: 'Classification of soil particles by size distribution using hydrometer and pipette analysis methods', data_type_characteristic: 'set', category_characteristic: 'soil_site', bibref_characteristic: 'USDA Handbook 60 Soil Classification', file_characteristic: 'textureRef.pdf'}, true],
 
-  // ===== EDIT/EDIT TESTS =====
+  // ===== EDIT TESTS =====
   ['characteristic', 'EDIT', 10, 'Editar nombre válido', {id_characteristic: '1', name_characteristic: 'EDITd Physical Property'}, true],
   ['characteristic', 'EDIT', 11, 'Editar con nombre vacío', {id_characteristic: '1', name_characteristic: ''}, 'name_required'],
   ['characteristic', 'EDIT', 12, 'Editar ID inexistente', {id_characteristic: '', name_characteristic: 'New Name'}, 'id_not_found'],

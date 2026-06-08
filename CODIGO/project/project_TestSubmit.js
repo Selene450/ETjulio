@@ -1,5 +1,5 @@
 window.project_TestSubmit = [
-  // ===== ADD (ADD) TESTS =====
+  // ===== ADD TESTS =====
   ['project', 'ADD', 1, 'Crear proyecto válido', {id_project: '789', name_project: 'European Soil Survey Study', start_date_project: '15/03/2024', end_date_project: '20/06/2024', responsable_project: 'Dr James Smith', organization_project: 'European Research Center', description_project: 'A comprehensive study of soil quality and composition across European territories', file_project: 'projectPlan.pdf', code_project: 'PROJ2024EU', acronym_project: 'ESS', id_sampling_methodology_project: '123'}, true],
   ['project', 'ADD', 2, 'Crear sin ID', {id_project: '', name_project: 'Soil Characterization Initiative', start_date_project: '01/04/2024', end_date_project: '31/08/2024', responsable_project: 'Dr Maria Garcia', organization_project: 'Research Institute', description_project: 'Detailed characterization of soil properties across different geographic regions', file_project: 'studyOutline.pdf', code_project: 'SCI2024', acronym_project: 'SCI', id_sampling_methodology_project: '456'}, 'id_required'],
   ['project', 'ADD', 3, 'Crear sin nombre', {id_project: '790', name_project: '', start_date_project: '10/05/2024', end_date_project: '15/09/2024', responsable_project: 'Dr John Wilson', organization_project: 'Agricultural Institute', description_project: 'Investigation of agricultural practices and soil degradation in European regions', file_project: 'agriculture_study.doc', code_project: 'AGR2024', acronym_project: 'AGR', id_sampling_methodology_project: '789'}, 'name_required'],
@@ -10,12 +10,12 @@ window.project_TestSubmit = [
   ['project', 'ADD', 8, 'Fecha fin memor que fecha inicio', {id_project: '795', name_project: 'Long Term Soil Monitoring', start_date_project: '15/08/2024', end_date_project: '14/08/2024', responsable_project: 'Dr Helen Taylor', organization_project: 'Monitoring Agency', description_project: 'Long term monitoring of soil conditions to track changes over extended periods', file_project: 'monitoringPlan.pdf', code_project: 'LTSM2024', acronym_project: 'LTSM', id_sampling_methodology_project: '369'}, 'end_date_min_KO'],
   ['project', 'ADD', 9, 'Crear con fecha inválida', {id_project: '796', name_project: 'Soil Biology Research', start_date_project: '32/08/2024', end_date_project: '30/11/2024', responsable_project: 'Dr Andrew White', organization_project: 'Biology Institute', description_project: 'Research on soil biological communities and their ecological functions', file_project: 'biologyResearch.docx', code_project: 'SBR2024', acronym_project: 'SBR', id_sampling_methodology_project: '741'}, 'start_date_format_KO'],
 
-  // ===== EDIT/EDIT TESTS =====
-  ['project', 'EDIT', 10, 'Actualizar nombre proyecto', {id_project: '789', name_project: 'EDITd European Study'}, true],
-  ['project', 'EDIT', 11, 'Actualizar con fecha fin menor', {id_project: '789', start_date_project: '20/06/2024', end_date_project: '15/03/2024'}, 'end_date_min_KO'],
-  ['project', 'EDIT', 12, 'Actualizar código', {id_project: '790', code_project: 'NEWSCI2024'}, true],
-  ['project', 'EDIT', 13, 'Actualizar acrónimo', {id_project: '791', acronym_project: 'UES'}, true],
-  ['project', 'EDIT', 14, 'Actualizar múltiples campos', {id_project: '792', responsable_project: 'Dr New Person', organization_project: 'New Org'}, true],
+  // ===== EDIT TESTS =====
+  ['project', 'EDIT', 10, 'Editar nombre proyecto', {id_project: '789', name_project: 'EDITd European Study'}, true],
+  ['project', 'EDIT', 11, 'Editar con fecha fin menor', {id_project: '789', start_date_project: '20/06/2024', end_date_project: '15/03/2024'}, 'end_date_min_KO'],
+  ['project', 'EDIT', 12, 'Editar código', {id_project: '790', code_project: 'NEWSCI2024'}, true],
+  ['project', 'EDIT', 13, 'Editar acrónimo', {id_project: '791', acronym_project: 'UES'}, true],
+  ['project', 'EDIT', 14, 'Editar múltiples campos', {id_project: '792', responsable_project: 'Dr New Person', organization_project: 'New Org'}, true],
   ['project', 'EDIT', 15, 'Editar permitir todos los campos editables', {id_project: '789', responsable_project: 'Dr Shane', name_project: 'EDITd European Soil Study', start_date_project: '20/04/2024', end_date_project: '25/07/2024', organization_project: 'EDITd Research Institute', description_project: 'EDITd comprehensive study with new information', file_project: 'EDITdPlan.pdf'}, true],
   ['project', 'EDIT', 16, 'Editar con ID inexistente', {id_project: '', name_project: 'New'}, 'id_not_found'],
   ['project', 'EDIT', 17, 'Editar solo descripción', {id_project: '790', description_project: 'New comprehensive soil characterization with EDITd details and analysis'}, true],

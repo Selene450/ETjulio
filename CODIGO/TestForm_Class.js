@@ -583,7 +583,7 @@ class TestForm {
         sec.style.cssText = 'padding:15px;text-align:center;background:#f5f5f5;';
         const btn = document.createElement('button');
         btn.textContent = 'Ver Detalles de cada Prueba';
-        btn.style.cssText = 'padding:10px 20px;background:#667eea;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px;';
+        btn.className = 'btn-primary';
         btn.onclick = () => this.showDetailedResults(execution.results);
         sec.appendChild(btn);
         return sec;
