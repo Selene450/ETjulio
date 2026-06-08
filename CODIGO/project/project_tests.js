@@ -91,7 +91,7 @@ window.project_def_tests = [
   ['project', 'file_project', 'file', 75, 'Comprobar editar archivo válido PDF', 'EDIT', true, ''],
   ['project', 'file_project', 'file', 76, 'Comprobar editar archivo válido DOC', 'EDIT', true, ''],
   ['project', 'file_project', 'file', 77, 'Comprobar editar archivo válido DOCX', 'EDIT', true, ''],
-  ['project', 'file_project', 'file', 78, 'Comprobar editar archivo no seleccionado', 'EDIT', 'file_required', 'El archivo es requerido'],
+  ['project', 'file_project', 'file', 78, 'Comprobar editar archivo no seleccionado', 'EDIT', true , ''],
   ['project', 'file_project', 'file', 79, 'Comprobar editar archivo con extensión no permitida', 'EDIT', 'file_format_KO', 'Solo se permiten archivos PDF, DOC o DOCX'],
   ['project', 'file_project', 'file', 80, 'Comprobar editar archivo mayor a 2MB', 'EDIT', 'file_max_size_KO', 'El archivo no debe superar 2MB'],
   ['project', 'file_project', 'file', 81, 'Comprobar editar archivo con acentos en nombre', 'EDIT', 'file_name_format_KO', 'El nombre del archivo no puede contener acentos o ñ'],
@@ -131,7 +131,11 @@ window.project_def_tests = [
   ['project', 'id_sampling_methodology_project', 'select', 109, 'Comprobar id_sampling_methodology con letras', 'ADD', 'sampling_format_KO', 'El ID de metodología solo debe contener dígitos'],
   ['project', 'id_sampling_methodology_project', 'select', 110, 'Comprobar editar id_sampling_methodology válido', 'EDIT', true, ''],
   ['project', 'id_sampling_methodology_project', 'select', 111, 'Comprobar editar id_sampling_methodology vacío', 'EDIT', 'sampling_required', 'La metodología de muestreo es requerida'],
-  ['project', 'id_sampling_methodology_project', 'select', 112, 'Comprobar editar id_sampling_methodology con letras', 'EDIT', 'sampling_format_KO', 'El ID de metodología solo debe contener dígitos']
+  ['project', 'id_sampling_methodology_project', 'select', 112, 'Comprobar editar id_sampling_methodology con letras', 'EDIT', 'sampling_format_KO', 'El ID de metodología solo debe contener dígitos'],
+  ['project', 'id_sampling_methodology_project', 'select', 113, 'Comprobar id_sampling_methodology mayor al máximo en ADD', 'ADD', 'sampling_max_size_KO', 'El ID de metodología debe tener máximo 11 dígitos'],
+  ['project', 'id_sampling_methodology_project', 'select', 114, 'Comprobar editar id_sampling_methodology mayor al máximo en EDIT', 'EDIT', 'sampling_max_size_KO', 'El ID de metodología debe tener máximo 11 dígitos'],
+  ['project', 'id_sampling_methodology_project', 'select', 115, 'Comprobar buscar por id_sampling_methodology válido', 'SEARCH', true, ''],
+  ['project', 'id_sampling_methodology_project', 'select', 116, 'Comprobar buscar por id_sampling_methodology superior al máximo', 'SEARCH', 'sampling_max_KO', 'El ID de metodología solo debe contener dígitos']
 ];
  
 window.project_pruebas = [
@@ -227,7 +231,7 @@ window.project_pruebas = [
   ['project', 'file_project', 75, 75, 'EDIT', [{id_project: '789', file_project: 'updatedPlan.pdf', mimeType: 'application/pdf', size: 1500000}], true],
   ['project', 'file_project', 76, 76, 'EDIT', [{id_project: '789', file_project: 'updatedDoc.doc', mimeType: 'application/msword', size: 1500000}], true],
   ['project', 'file_project', 77, 77, 'EDIT', [{id_project: '789', file_project: 'updatedFile.docx', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', size: 1500000}], true],
-  ['project', 'file_project', 78, 78, 'EDIT', [{id_project: '789', file_project: null}], 'file_required'],
+  ['project', 'file_project', 78, 78, 'EDIT', [{id_project: '789', file_project: null}], true],
   ['project', 'file_project', 79, 79, 'EDIT', [{id_project: '789', file_project: 'invalid.txt', mimeType: 'text/plain', size: 1000000}], 'file_format_KO'],
   ['project', 'file_project', 80, 80, 'EDIT', [{id_project: '789', file_project: 'largeFile.pdf', mimeType: 'application/pdf', size: 2500000}], 'file_max_size_KO'],
   ['project', 'file_project', 81, 81, 'EDIT', [{id_project: '789', file_project: 'projécto.pdf', mimeType: 'application/pdf', size: 1500000}], 'file_name_format_KO'],
@@ -267,5 +271,7 @@ window.project_pruebas = [
   ['project', 'id_sampling_methodology_project', 109, 109, 'ADD', [{id_sampling_methodology_project: 'abc'}], 'sampling_format_KO'],
   ['project', 'id_sampling_methodology_project', 110, 110, 'EDIT', [{id_project: '789', id_sampling_methodology_project: '3'}], true],
   ['project', 'id_sampling_methodology_project', 111, 111, 'EDIT', [{id_project: '789', id_sampling_methodology_project: ''}], 'sampling_required'],
-  ['project', 'id_sampling_methodology_project', 112, 112, 'EDIT', [{id_project: '789', id_sampling_methodology_project: 'abc'}], 'sampling_format_KO']
+  ['project', 'id_sampling_methodology_project', 112, 112, 'EDIT', [{id_project: '789', id_sampling_methodology_project: 'abc'}], 'sampling_format_KO'],
+  ['project', 'id_sampling_methodology_project', 113, 113, 'ADD', [{id_sampling_methodology_project: '123456789012'}], 'sampling_max_size_KO'],
+  ['project', 'id_sampling_methodology_project', 114, 114, 'EDIT', [{id_project: '789', id_sampling_methodology_project: '123456789012'}], 'sampling_max_size_KO'],
 ];

@@ -83,7 +83,8 @@ window.characteristic_def_tests = [
   ['characteristic', 'file_characteristic', 'file', 67, 'Comprobar editar archivo con espacios en nombre', 'EDIT', 'file_name_format_KO', 'El nombre del archivo no puede contener espacios'],
   ['characteristic', 'file_characteristic', 'file', 68, 'Comprobar editar archivo con nombre menor a 7 caracteres', 'EDIT', 'file_name_min_size_KO', 'El nombre del archivo debe tener mínimo 7 caracteres'],
   ['characteristic', 'file_characteristic', 'file', 69, 'Comprobar editar archivo con nombre mayor a 100 caracteres', 'EDIT', 'file_name_max_size_KO', 'El nombre del archivo debe tener máximo 100 caracteres'],
-  ['characteristic', 'file_characteristic', 'file', 70, 'Comprobar buscar por nombre archivo', 'SEARCH', true, '']
+  ['characteristic', 'file_characteristic', 'file', 70, 'Comprobar buscar por nombre archivo', 'SEARCH', true, ''],
+  ['characteristic', 'file_characteristic', 'file', 71, 'Comprobar buscar por archivo con nombre mayor a 100 caracteres', 'SEARCH', 'file_name_max_size_KO', 'El nombre del archivo no puede superar los 100 caracteres'],
 ];
 
 window.characteristic_pruebas = [
@@ -169,6 +170,7 @@ window.characteristic_pruebas = [
   ['characteristic', 'file_characteristic', 67, 67, 'EDIT', [{id_characteristic: '123', file_characteristic: 'my document.pdf', mimeType: 'application/pdf', size: 150000}], 'file_name_format_KO'],
   ['characteristic', 'file_characteristic', 68, 68, 'EDIT', [{id_characteristic: '123', file_characteristic: 'd.pdf', mimeType: 'application/pdf', size: 150000}], 'file_name_min_size_KO'],
   ['characteristic', 'file_characteristic', 69, 69, 'EDIT', [{id_characteristic: '123', file_characteristic: 'a'.repeat(100) + '.pdf', mimeType: 'application/pdf', size: 150000}], 'file_name_max_size_KO'],
-  ['characteristic', 'file_characteristic', 70, 70, 'SEARCH', [{file_characteristic: 'document'}], true]
+  ['characteristic', 'file_characteristic', 70, 70, 'SEARCH', [{file_characteristic: 'document'}], true],
+  ['characteristic', 'file_characteristic', 71, 71, 'SEARCH', [{file_characteristic: 'a'.repeat(101) + '.pdf'}], 'file_name_max_size_KO'],
 ];
  

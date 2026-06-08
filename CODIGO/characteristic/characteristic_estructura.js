@@ -198,6 +198,9 @@ window.characteristic_estructura = {
                         format_name_file: [{ format_name_file: '^[a-zA-Z0-9\\.]+$' }],
                         min_size: 7,
                         max_size: 100
+                    },
+                    SEARCH: {
+                        max_size: 100
                     }
                 }
             }

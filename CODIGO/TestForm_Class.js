@@ -505,10 +505,10 @@ class TestForm {
     buildStructureSection(s) {
         const sec = this.buildSection('Estructura de la Entidad');
         if (!s.valid) {
-            sec.innerHTML += `<p style="color:#f44336;">❌ ${s.error}</p>`;
+            sec.innerHTML += `<p style="color:#f44336;"> ${s.error}</p>`;
         } else {
             sec.innerHTML += `
-                <p>✅ <strong>Estado:</strong> Correcta</p>
+                <p> <strong>Estado:</strong> Correcta</p>
                 <p><strong>Total atributos:</strong> ${s.count}</p>
                 <p><strong>Atributos:</strong> ${s.attributes}</p>`;
         }
@@ -518,7 +518,7 @@ class TestForm {
     buildDefinitionsSection(d) {
         const sec = this.buildSection('Definiciones de Test (def_tests)');
         if (d.error) {
-            sec.innerHTML += `<p style="color:#f44336;">❌ ${d.error}</p>`;
+            sec.innerHTML += `<p style="color:#f44336;"> ${d.error}</p>`;
         } else {
             const byAttr = Object.entries(d.byAttribute || {})
                 .map(([k, v]) => `<li>${k}: ${v}</li>`).join('');
@@ -545,7 +545,7 @@ class TestForm {
     buildDataSection(d) {
         const sec = this.buildSection('Pruebas (pruebas / tests_fields)');
         if (d.error) {
-            sec.innerHTML += `<p style="color:#f44336;">❌ ${d.error}</p>`;
+            sec.innerHTML += `<p style="color:#f44336;"> ${d.error}</p>`;
         } else {
             let issuesHtml = '';
             if (d.issues && d.issues.length) {

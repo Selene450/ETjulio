@@ -70,7 +70,8 @@ window.analysis_preparation_def_tests = [
   ['analysis_preparation', 'file_analysis_preparation', 'file', 58, 'Comprobar editar archivo con espacios en nombre', 'EDIT', 'file_name_format_KO', 'El nombre del archivo no puede contener espacios'],
   ['analysis_preparation', 'file_analysis_preparation', 'file', 59, 'Comprobar editar archivo con nombre menor a 7 caracteres', 'EDIT', 'file_name_min_size_KO', 'El nombre del archivo debe tener mínimo 7 caracteres'],
   ['analysis_preparation', 'file_analysis_preparation', 'file', 60, 'Comprobar editar archivo con nombre mayor a 100 caracteres', 'EDIT', 'file_name_max_size_KO', 'El nombre del archivo debe tener máximo 100 caracteres'],
-  ['analysis_preparation', 'file_analysis_preparation', 'file', 61, 'Comprobar buscar por nombre archivo', 'SEARCH', true, '']
+  ['analysis_preparation', 'file_analysis_preparation', 'file', 61, 'Comprobar buscar por nombre archivo', 'SEARCH', true, ''],
+  ['analysis_preparation', 'file_analysis_preparation', 'file', 62, 'Comprobar buscar por archivo con nombre mayor a 100 caracteres', 'SEARCH', 'file_name_max_size_KO', 'El nombre del archivo no puede superar los 100 caracteres'],
 ];
 
 window.analysis_preparation_pruebas = [
@@ -143,6 +144,7 @@ window.analysis_preparation_pruebas = [
   ['analysis_preparation', 'file_analysis_preparation', 58, 58, 'EDIT', [{id_analysis_preparation: '456', file_analysis_preparation: 'my document.pdf', mimeType: 'application/pdf', size: 1500000}], 'file_name_format_KO'],
   ['analysis_preparation', 'file_analysis_preparation', 59, 59, 'EDIT', [{id_analysis_preparation: '456', file_analysis_preparation: 'd.pdf', mimeType: 'application/pdf', size: 1500000}], 'file_name_min_size_KO'],
   ['analysis_preparation', 'file_analysis_preparation', 60, 60, 'EDIT', [{id_analysis_preparation: '456', file_analysis_preparation: 'a'.repeat(100) + '.pdf', mimeType: 'application/pdf', size: 1500000}], 'file_name_max_size_KO'],
-  ['analysis_preparation', 'file_analysis_preparation', 61, 61, 'SEARCH', [{file_analysis_preparation: 'protocol'}], true]
+  ['analysis_preparation', 'file_analysis_preparation', 61, 61, 'SEARCH', [{file_analysis_preparation: 'protocol'}], true],
+  ['analysis_preparation', 'file_analysis_preparation', 62, 62, 'SEARCH', [{file_analysis_preparation: 'a'.repeat(101) + '.pdf'}], 'file_name_max_size_KO'],
 ];
  
