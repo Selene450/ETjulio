@@ -71,8 +71,8 @@ class TestSubmit {
             const checkResult = this.checkSubmit(action, formData || {});
 
             const expectedError = expectedResult !== true;
-            const hasErrors     = checkResult !== true;
-            const correct       = expectedError === hasErrors;
+            const hasErrors = checkResult !== true;
+            const correct = expectedError === hasErrors;
 
             return {
                 num: num || (index + 1),
@@ -114,12 +114,12 @@ class TestSubmit {
                 : {};
 
             // Determinar si el campo es nullable en esta acción
-            const isNullDef  = (fieldDef.db && fieldDef.db.is_null) ? fieldDef.db.is_null : {};
+            const isNullDef = (fieldDef.db && fieldDef.db.is_null) ? fieldDef.db.is_null : {};
             const isNullable = typeof isNullDef === 'object' && isNullDef[normalizedAction] === true;
 
-            const htmlTag  = fieldDef.html ? fieldDef.html.tag  : 'input';
+            const htmlTag = fieldDef.html ? fieldDef.html.tag : 'input';
             const htmlType = fieldDef.html ? fieldDef.html.type : 'text';
-            const isFile   = (htmlTag === 'file' || htmlType === 'file');
+            const isFile = (htmlTag === 'file' || htmlType === 'file');
 
             // Extraer valor del formData (puede no estar presente)
             const hasField = Object.prototype.hasOwnProperty.call(formData, fieldName);
@@ -148,7 +148,7 @@ class TestSubmit {
 
     validateFieldValue(fieldName, rawValue, validations, isNullable, action, formData) {
         const strVal = (rawValue === null || rawValue === undefined) ? '' : String(rawValue);
-        const empty  = strVal.trim() === '';
+        const empty = strVal.trim() === '';
 
         // Required: campo NOT NULL y acción es ADD o EDIT
         if (!isNullable && (action === 'ADD' || action === 'EDIT') && empty) {
@@ -209,7 +209,7 @@ class TestSubmit {
 
         const fileName = String(rawValue);
         const mimeType = formData.mimeType;
-        const size     = formData.size;
+        const size = formData.size;
 
         // type_file
         if (validations.type_file && Array.isArray(validations.type_file)) {
@@ -253,7 +253,7 @@ class TestSubmit {
         if (!/^\d{2}[\/\-]\d{2}[\/\-]\d{4}$/.test(value)) {
             return 'Formato de fecha inválido (DD-MM-YYYY)';
         }
-        const sep   = value[2];
+        const sep = value[2];
         const [day, month, year] = value.split(sep).map(Number);
         const d = new Date(year, month - 1, day);
         if (d.getFullYear() !== year || d.getMonth() !== month - 1 || d.getDate() !== day) {
@@ -308,7 +308,7 @@ class TestSubmit {
             if (!results || results.length === 0) continue;
             const sec = document.createElement('div');
             sec.style.padding = '10px 15px';
-            sec.innerHTML = `<h3${action}</h3>`;
+            sec.innerHTML = `<h3>${action}</h3>`;
 
             const table = document.createElement('table');
             table.style.cssText = 'width:100%;border-collapse:collapse;font-size:13px;margin-bottom:20px;';
@@ -327,8 +327,8 @@ class TestSubmit {
                 const row = document.createElement('tr');
                 row.style.borderBottom = '1px solid #e0e0e0';
                 if (!r.correct) row.style.backgroundColor = '#fff3f3';
-                const color    = r.correct ? '#4caf50' : '#f44336';
-                const status   = r.correct ? '✓ OK' : '✗ FALLO';
+                const color = r.correct ? '#4caf50' : '#f44336';
+                const status = r.correct ? '✓ OK' : '✗ FALLO';
                 const expected = r.expectedResult === true ? 'Éxito' : `Error (${r.expectedResult})`;
                 row.innerHTML = `
                     <td style="padding:8px;text-align:center;">${r.num}</td>
@@ -349,18 +349,20 @@ class TestSubmit {
     buildModal(titleText) {
         const modal = document.createElement('div');
         modal.className = 'modal';
-        modal.style.display = 'flex';
+
         const content = document.createElement('div');
-        content.className = 'modal-content';
-        content.style.cssText = 'max-height:90vh;overflow-x:auto;overflow-y:auto;min-width:600px;max-width:95vw;';
+        content.className = 'modal-content modal-content-large'; // Añadimos clase para modales de datos grandes
+
         const header = document.createElement('div');
         header.className = 'modal-header';
         header.innerHTML = `<h2>${titleText}</h2>`;
+
         const closeBtn = document.createElement('span');
-        closeBtn.className = 'close-btn';
+        closeBtn.className = 'close-btn'; // CSS se encargará del cursor pointer
         closeBtn.innerHTML = '&times;';
         closeBtn.style.cursor = 'pointer';
         closeBtn.onclick = () => modal.remove();
+
         header.appendChild(closeBtn);
         content.appendChild(header);
         modal.appendChild(content);
@@ -369,10 +371,10 @@ class TestSubmit {
 
     showError(title, message) {
         const modal = this.buildModal(title);
+        modal.classList.add('modal-danger-state'); // Cambiamos el color de cabecera mediante CSS
         const content = modal.querySelector('.modal-content');
-        content.querySelector('.modal-header').style.backgroundColor = '#f44336';
         const body = document.createElement('div');
-        body.style.padding = '20px';
+        body.className = 'modal-body-error'; // Padding controlado por CSS
         body.textContent = message;
         content.appendChild(body);
         document.body.appendChild(modal);

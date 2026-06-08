@@ -16,16 +16,16 @@ class TestForm {
      * Abre una nueva ventana modal con todos los resultados del análisis
      */
     showWindow() {
-        const structureAnalysis   = this.analyzeStructure();
+        const structureAnalysis = this.analyzeStructure();
         const definitionsAnalysis = this.analyzeTestDefinitions();
-        const dataAnalysis        = this.analyzeTestData();
-        const executionResults    = this.executeAllTests();
+        const dataAnalysis = this.analyzeTestData();
+        const executionResults = this.executeAllTests();
 
         this.displayResults({
-            structure:   structureAnalysis,
+            structure: structureAnalysis,
             definitions: definitionsAnalysis,
-            data:        dataAnalysis,
-            execution:   executionResults
+            data: dataAnalysis,
+            execution: executionResults
         });
     }
 
@@ -71,7 +71,7 @@ class TestForm {
         for (let i = 0; i < defs.length; i++) {
             const d = defs[i];
             if (!Array.isArray(d) || d.length < 7) {
-                issues.push(`Def ${i+1}: necesita al menos 7 campos`);
+                issues.push(`Def ${i + 1}: necesita al menos 7 campos`);
                 continue;
             }
             const [entity, field, htmlElem, id, description, action, expectedResult] = d;
@@ -80,7 +80,7 @@ class TestForm {
                 typeof htmlElem !== 'string' || typeof id !== 'number' ||
                 typeof description !== 'string' || typeof action !== 'string' ||
                 (expectedResult !== true && typeof expectedResult !== 'string')) {
-                issues.push(`Def ${i+1} (id:${id}): tipos incorrectos`);
+                issues.push(`Def ${i + 1} (id:${id}): tipos incorrectos`);
                 continue;
             }
             wellDefined++;
@@ -116,7 +116,7 @@ class TestForm {
         for (let i = 0; i < pruebas.length; i++) {
             const p = pruebas[i];
             if (!Array.isArray(p) || p.length < 7) {
-                issues.push(`Prueba ${i+1}: necesita 7 campos`);
+                issues.push(`Prueba ${i + 1}: necesita 7 campos`);
                 continue;
             }
             const [entity, field, defTestNum, pruebaNum, action, values, expectedResult] = p;
@@ -124,7 +124,7 @@ class TestForm {
                 typeof defTestNum !== 'number' || typeof pruebaNum !== 'number' ||
                 typeof action !== 'string' || !Array.isArray(values) ||
                 (expectedResult !== true && typeof expectedResult !== 'string')) {
-                issues.push(`Prueba ${i+1}: tipos incorrectos`);
+                issues.push(`Prueba ${i + 1}: tipos incorrectos`);
                 continue;
             }
             wellTyped++;
@@ -178,7 +178,7 @@ class TestForm {
             } else {
                 defTest = null;
             }
-            
+
             let testDescription;
             if (defTest) {
                 testDescription = defTest[4];
@@ -215,14 +215,14 @@ class TestForm {
             } else {
                 htmlTag = 'input';
             }
-            
+
             let htmlType;
             if (fieldDef.html) {
                 htmlType = fieldDef.html.type;
             } else {
                 htmlType = 'text';
             }
-            const isFile   = (htmlTag === 'file' || htmlType === 'file');
+            const isFile = (htmlTag === 'file' || htmlType === 'file');
 
             // Obtener validaciones de la estructura para este campo y acción
             let validations;
@@ -246,8 +246,8 @@ class TestForm {
 
             // Comparar: expectedResult===true -> esperamos sin error; string -> esperamos error
             const expectedError = expectedResult !== true;
-            const gotError      = actualResult !== true;
-            
+            const gotError = actualResult !== true;
+
             let passed;
             if (expectedError === gotError) {
                 passed = true;
@@ -261,7 +261,7 @@ class TestForm {
             } else {
                 message = 'OK';
             }
-            
+
             return {
                 pruebaNum, defTestNum, testDescription, fieldName, action,
                 testValue: rawValue,
@@ -331,7 +331,7 @@ class TestForm {
         // Si vacío y nullable, no seguir validando formato/tamaño
         const element = document.getElementById(elementId);
         if (!element) return true;
-        
+
         let val;
         if (element.value !== undefined) {
             val = element.value.trim();
@@ -406,7 +406,7 @@ class TestForm {
             } else {
                 fileRequired = false;
             }
-            
+
             if (fileRequired) {
                 return 'No se ha seleccionado ningún fichero';
             }
@@ -415,7 +415,7 @@ class TestForm {
 
         const fileName = String(rawValue);
         const mimeType = testObj.mimeType;
-        const size     = testObj.size;
+        const size = testObj.size;
 
         // type_file: [{type_file: 'application/pdf'}, ...]
         if (validations.type_file && Array.isArray(validations.type_file)) {
@@ -522,17 +522,17 @@ class TestForm {
         } else {
             const byAttr = Object.entries(d.byAttribute || {})
                 .map(([k, v]) => `<li>${k}: ${v}</li>`).join('');
-            
+
             let byAttrHtml = '';
             if (byAttr) {
                 byAttrHtml = `<p><strong>Por atributo:</strong></p><ul style="padding-left:20px">${byAttr}</ul>`;
             }
-            
+
             let issuesHtml = '';
             if (d.issues && d.issues.length) {
                 issuesHtml = `<p style="color:#ff9800;">Problemas: ${d.issues.join(' | ')}</p>`;
             }
-            
+
             sec.innerHTML += `
                 <p><strong>Total definiciones:</strong> ${d.count}</p>
                 <p><strong>Bien definidas:</strong> ${d.wellDefined} / ${d.count}</p>
@@ -551,7 +551,7 @@ class TestForm {
             if (d.issues && d.issues.length) {
                 issuesHtml = `<p style="color:#ff9800;">Problemas: ${d.issues.join(' | ')}</p>`;
             }
-            
+
             sec.innerHTML += `
                 <p><strong>Total pruebas:</strong> ${d.count}</p>
                 <p><strong>Bien tipificadas:</strong> ${d.wellTyped} / ${d.count}</p>
@@ -613,28 +613,28 @@ class TestForm {
             const row = document.createElement('tr');
             row.style.borderBottom = '1px solid #e0e0e0';
             if (!r.passed) row.style.backgroundColor = '#fff3f3';
-            
+
             let color;
             if (r.passed) {
                 color = '#4caf50';
             } else {
                 color = '#f44336';
             }
-            
+
             let status;
             if (r.passed) {
                 status = '✓ OK';
             } else {
                 status = '✗ FALLO';
             }
-            
+
             let expected;
             if (r.expectedResult === true) {
                 expected = 'Éxito';
             } else {
                 expected = `Error (${r.expectedResult})`;
             }
-            
+
             let obtained;
             if (r.actualResult === true) {
                 obtained = 'Éxito';
@@ -657,15 +657,15 @@ class TestForm {
             if (action === undefined || action === null) {
                 action = '';
             }
-            
+
             row.innerHTML = `
-                <td style="padding:8px;text-align:center;">${pruebaNum}</td>
-                <td style="padding:8px;font-family:monospace;font-size:11px;">${fieldName}</td>
-                <td style="padding:8px;">${testDescription}</td>
-                <td style="padding:8px;text-align:center;">${action}</td>
-                <td style="padding:8px;text-align:center;">${expected}</td>
-                <td style="padding:8px;">${obtained}</td>
-                <td style="padding:8px;text-align:center;color:${color};font-weight:bold;">${status}</td>`;
+            <td class="cell-center">${pruebaNum}</td>
+            <td class="cell-mono">${fieldName}</td>
+            <td>${testDescription}</td>
+            <td class="cell-center">${action}</td>
+            <td class="cell-center">${expected}</td>
+            <td>${obtained}</td>
+            <td class="cell-center cell-status" style="color: ${color};">${status}</td>`;
             tbody.appendChild(row);
         }
         table.appendChild(tbody);
@@ -675,10 +675,10 @@ class TestForm {
 
     showError(title, message) {
         const modal = this.buildModal(title);
+        modal.classList.add('modal-danger-state'); 
         const content = modal.querySelector('.modal-content');
-        content.querySelector('.modal-header').style.backgroundColor = '#f44336';
         const body = document.createElement('div');
-        body.style.padding = '20px';
+        body.className = 'modal-body-error'; 
         body.textContent = message;
         content.appendChild(body);
         document.body.appendChild(modal);

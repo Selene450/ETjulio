@@ -81,10 +81,10 @@ class Gestor {
             </div>
             <div class="entity-buttons">
                 <button class="btn-entity" onclick="testAttributesButton('${this.entityName}')">
-                    🔬 Test de Atributos
+                    Test de Atributos
                 </button>
                 <button class="btn-entity" onclick="testFormButton('${this.entityName}')">
-                    📋 Test de Formulario
+                    Test de Formulario
                 </button>
             </div>
         `;

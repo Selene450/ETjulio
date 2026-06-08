@@ -98,6 +98,25 @@ nav {
     /* Ya no lleva border-right */
 }
 
+.menu-title {
+    list-style: none;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    text-transform: none;
+    color: var(--emphasis-color-1); 
+    padding: 10px 15px 12px 15px;
+    letter-spacing: normal;
+}
+
+.menu-divider {
+    list-style: none;
+    height: 1px;
+    background-color: var(--emphasis-color-2); 
+    margin: 5px 15px 15px 15px;
+    opacity: 0.5;
+}
+
 .menu-toggle {
     display: none;
     background: var(--emphasis-color-1);
@@ -427,7 +446,7 @@ table tr:hover {
    ========================================== */
 
 footer {
-    background-color: var(--dark-color);
+    background-color: var(--emphasis-color-1);
     color: var(--medium-color);
     text-align: center;
     padding: 20px;
@@ -543,6 +562,22 @@ button:active {
     background-color: #388e3c;
 }
 
+/*boton API*/
+.api-custom-icon {
+    display: inline-block;
+    width: 32px;  
+    height: 32px;
+    background-image: url('../iconos/API.png'); 
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    transition: transform 0.2s ease;
+}
+
+.api-custom-icon:hover {
+    transform: scale(1.1); /* Efecto visual al pasar el ratón */
+}
+
 /* ==========================================
    RESPONSIVE
    ========================================== */
@@ -610,154 +645,319 @@ button:active {
         padding: 6px;
     }
 
-   
+
 }
 
- /*==========================================
+/*==========================================
     ESTILOS EXCLUSIVOS PARA LA API.html
     ==========================================*/
 
-    /* Desactivamos el Grid global para que la página fluya de arriba a abajo */
-    body.api-page {
-        display: block;
-        height: auto;
-        min-height: 100vh;
-        background-color: #f8f9fa;
-        /* Un fondo gris claro muy limpio para leer */
+/* Desactivamos el Grid global para que la página fluya de arriba a abajo */
+body.api-page {
+    display: block;
+    height: auto;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+    /* Un fondo gris claro muy limpio para leer */
+}
+
+/* Encabezado superior */
+.api-page .api-header {
+    background: linear-gradient(135deg, var(--emphasis-color-1), #6b266c);
+    /* Degradado elegante */
+    color: var(--light-color);
+    padding: 50px 20px;
+    text-align: center;
+    box-shadow: inset 0 -5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.api-page .api-header h1 {
+    font-size: 34px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    letter-spacing: -0.5px;
+}
+
+.api-page .api-header p {
+    font-size: 16px;
+    opacity: 0.9;
+}
+
+/* Barra de navegación pegajosa (Sticky Nav) */
+.api-page .api-nav {
+    background-color: var(--medium-color);
+    border-bottom: 2px solid var(--emphasis-color-2);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.api-page .api-nav ul {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 12px 20px;
+}
+
+.api-page .api-nav a {
+    color: var(--dark-color);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 6px 12px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.api-page .api-nav a:hover {
+    background-color: var(--emphasis-color-2);
+    color: var(--emphasis-color-1);
+}
+
+/* Botón de regreso a la aplicación principal */
+.api-page .api-nav ul .nav-back-button a {
+    background-color: var(--emphasis-color-1);
+    color: var(--light-color) !important;
+    border: 1px solid var(--emphasis-color-1);
+    border-radius: 4px;
+    padding: 6px 14px;
+    font-weight: 700;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.api-page .api-nav ul .nav-back-button a:hover {
+    background-color: transparent;
+    color: var(--emphasis-color-1) !important;
+    border-color: var(--emphasis-color-1);
+    transform: translateX(-2px);
+    /* Pequeño efecto visual hacia la izquierda */
+}
+
+/* Contenedor del contenido */
+.api-page .api-container {
+    max-width: 95%;
+    /* Ahora se adaptará a pantallas anchas */
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+/* Secciones / Tarjetas de información */
+.api-page .api-section {
+    background: #ffffff;
+    padding: 35px;
+    margin-bottom: 35px;
+    border-radius: 10px;
+    border: 1px solid rgba(221, 136, 207, 0.2);
+    /* Borde sutil con emphasis-color-2 */
+    box-shadow: 0 4px 12px rgba(14, 44, 49, 0.03);
+}
+
+/* Títulos dentro de las secciones */
+.api-page .api-section h2 {
+    color: var(--emphasis-color-1);
+    font-size: 24px;
+    border-bottom: 2px solid var(--medium-color);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.api-page .api-section h3 {
+    color: var(--emphasis-color-1);
+    font-size: 16px;
+    margin-top: 30px;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.api-page .api-section p {
+    color: #4a5568;
+    font-size: 15px;
+    line-height: 1.7;
+    margin-bottom: 15px;
+}
+
+/* Bloques de Código Fuente */
+/* Bloques de Código Fuente y Diagramas ASCII */
+.api-page .code-block {
+    background-color: #1a202c;
+    color: #edf2f7;
+    padding: 20px;
+    border-radius: 8px;
+    /* Fuente estrictamente monoespaciada clásica */
+    font-family: Consolas, 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.2;
+    /* Interlineado reducido para que las líneas verticales conecten */
+    white-space: pre;
+    /* Prohíbe que el texto salte de línea y rompa el dibujo */
+    overflow-x: auto;
+    /* Añade una barra de desplazamiento horizontal si el diagrama es gigante */
+    margin: 15px 0 25px 0;
+    border-left: 4px solid var(--emphasis-color-2);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Ajuste específico para listas de texto si las hubiera */
+.api-page .api-section ul {
+    margin-left: 20px;
+    margin-bottom: 15px;
+    color: #4a5568;
+}
+
+.api-page .api-section li {
+    margin-bottom: 5px;
+}
+
+/* ==========================================
+   DIAGRAMAS DE FLUJO ADAPTADOS CON FLEXBOX (HTML/CSS PURO)
+   ========================================== */
+
+.flow-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin: 25px 0 40px 0;
+    flex-wrap: wrap;
+    /* Permite que caiga en cascada ordenada si la pantalla es estrecha */
+}
+
+.flow-card {
+    background: #ffffff;
+    border: 2px solid var(--medium-color);
+    border-radius: 8px;
+    padding: 20px;
+    flex: 1;
+    min-width: 200px;
+    position: relative;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.flow-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--emphasis-color-2);
+}
+
+/* Tarjeta de finalización o resaltada */
+.flow-card.highlight {
+    border-color: var(--emphasis-color-1);
+    background-color: #fdf6fd;
+}
+
+.flow-card h4 {
+    color: var(--emphasis-color-1);
+    font-size: 15px;
+    margin-bottom: 8px;
+    margin-top: 5px;
+}
+
+.flow-card p {
+    font-size: 12px !important;
+    line-height: 1.5 !important;
+    color: #5a6578;
+    margin: 0;
+}
+
+.flow-card code {
+    background: var(--medium-color);
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-size: 11px;
+}
+
+/* Badges decorativos superiores */
+.flow-badge {
+    position: absolute;
+    top: -12px;
+    left: 15px;
+    background: var(--emphasis-color-2);
+    color: var(--emphasis-color-1);
+    font-size: 10px;
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 20px;
+    text-transform: uppercase;
+}
+
+.flow-badge.alert {
+    background: var(--emphasis-color-1);
+    color: white;
+}
+
+/* Flechas conectoras */
+.flow-connector {
+    font-size: 24px;
+    color: var(--emphasis-color-2);
+    font-weight: bold;
+    user-select: none;
+    text-align: center;
+}
+
+/* ==========================================================================
+   CLASES DE SOPORTE PARA COMPONENTES DINÁMICOS (Sustitución de Estilos Inline)
+   ========================================================================== */
+
+/* Control de visualización y comportamiento base de modales JS */
+.modal {
+    display: flex !important; /* Fuerza el centrado nativo con Flexbox */
+}
+
+.close-btn {
+    cursor: pointer; /* Asegura el puntero de mano en la 'X' de cierre */
+}
+
+/* Modales de visualización de datos masivos (TestSubmit) */
+.modal-content-large {
+    max-height: 90vh;
+    overflow: auto;
+    min-width: 600px;
+    max-width: 95vw;
+}
+
+/* Estado de Error en Ventanas Modales */
+.modal-danger-state .modal-header {
+    background-color: #f44336 !important; /* Rojo semántico de error */
+}
+
+.modal-body-error {
+    padding: 20px;
+    color: var(--dark-color);
+}
+
+/* Estilos de celdas específicas para las tablas de TestForm */
+.cell-center {
+    padding: 8px !important;
+    text-align: center;
+}
+
+.cell-mono {
+    padding: 8px !important;
+    font-family: Consolas, 'Courier New', monospace;
+    font-size: 11px;
+}
+
+.cell-status {
+    font-weight: bold;
+}
+
+/* Optimización Responsive: en móviles las flechas giran hacia abajo */
+@media (max-width: 768px) {
+    .flow-container {
+        flex-direction: column;
+        align-items: stretch;
     }
 
-    /* Encabezado superior */
-    .api-page .api-header {
-        background: linear-gradient(135deg, var(--emphasis-color-1), #6b266c);
-        /* Degradado elegante */
-        color: var(--light-color);
-        padding: 50px 20px;
-        text-align: center;
-        box-shadow: inset 0 -5px 15px rgba(0, 0, 0, 0.1);
+    .flow-connector {
+        transform: rotate(90deg);
+        margin: 5px 0;
     }
-
-    .api-page .api-header h1 {
-        font-size: 34px;
-        font-weight: 700;
-        margin-bottom: 10px;
-        letter-spacing: -0.5px;
-    }
-
-    .api-page .api-header p {
-        font-size: 16px;
-        opacity: 0.9;
-    }
-
-    /* Barra de navegación pegajosa (Sticky Nav) */
-    .api-page .api-nav {
-        background-color: var(--medium-color);
-        border-bottom: 2px solid var(--emphasis-color-2);
-        position: sticky;
-        top: 0;
-        z-index: 1000;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    }
-
-    .api-page .api-nav ul {
-        list-style: none;
-        display: flex;
-        justify-content: center;
-        gap: 20px;
-        flex-wrap: wrap;
-        max-width: 1100px;
-        margin: 0 auto;
-        padding: 12px 20px;
-    }
-
-    .api-page .api-nav a {
-        color: var(--dark-color);
-        text-decoration: none;
-        font-weight: 600;
-        font-size: 13px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        padding: 6px 12px;
-        border-radius: 4px;
-        transition: all 0.2s ease;
-    }
-
-    .api-page .api-nav a:hover {
-        background-color: var(--emphasis-color-2);
-        color: var(--emphasis-color-1);
-    }
-
-    /* Contenedor del contenido */
-    .api-page .api-container {
-        max-width: 95%;
-        /* Ahora se adaptará a pantallas anchas */
-        margin: 40px auto;
-        padding: 0 20px;
-    }
-
-    /* Secciones / Tarjetas de información */
-    .api-page .api-section {
-        background: #ffffff;
-        padding: 35px;
-        margin-bottom: 35px;
-        border-radius: 10px;
-        border: 1px solid rgba(221, 136, 207, 0.2);
-        /* Borde sutil con emphasis-color-2 */
-        box-shadow: 0 4px 12px rgba(14, 44, 49, 0.03);
-    }
-
-    /* Títulos dentro de las secciones */
-    .api-page .api-section h2 {
-        color: var(--emphasis-color-1);
-        font-size: 24px;
-        border-bottom: 2px solid var(--medium-color);
-        padding-bottom: 10px;
-        margin-bottom: 20px;
-    }
-
-    .api-page .api-section h3 {
-        color: var(--emphasis-color-1);
-        font-size: 16px;
-        margin-top: 30px;
-        margin-bottom: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .api-page .api-section p {
-        color: #4a5568;
-        font-size: 15px;
-        line-height: 1.7;
-        margin-bottom: 15px;
-    }
-
-    /* Bloques de Código Fuente */
-    /* Bloques de Código Fuente y Diagramas ASCII */
-    .api-page .code-block {
-        background-color: #1a202c;
-        color: #edf2f7;
-        padding: 20px;
-        border-radius: 8px;
-        /* Fuente estrictamente monoespaciada clásica */
-        font-family: Consolas, 'Courier New', monospace;
-        font-size: 13px;
-        line-height: 1.2;
-        /* Interlineado reducido para que las líneas verticales conecten */
-        white-space: pre;
-        /* Prohíbe que el texto salte de línea y rompa el dibujo */
-        overflow-x: auto;
-        /* Añade una barra de desplazamiento horizontal si el diagrama es gigante */
-        margin: 15px 0 25px 0;
-        border-left: 4px solid var(--emphasis-color-2);
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
-    }
-
-    /* Ajuste específico para listas de texto si las hubiera */
-    .api-page .api-section ul {
-        margin-left: 20px;
-        margin-bottom: 15px;
-        color: #4a5568;
-    }
-
-    .api-page .api-section li {
-        margin-bottom: 5px;
-    }
+}

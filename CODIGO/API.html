@@ -1,928 +1,374 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>API Documentation - Sistema de Pruebas de Entidades</title>
+    <title>Especificación Técnica de la API - Criterio de Evaluación</title>
     <link rel="stylesheet" href="css/IU.css">
 </head>
+
 <body class="api-page">
 
-<div class="api-header">
-    <h1>API Documentation</h1>
-    <p>Sistema de Pruebas para Gestión de Entidades de Base de Datos</p>
-</div>
-
-<div class="api-nav">
-    <ul>
-        <li><a href="#overview">Descripción General</a></li>
-        <li><a href="#validations">Validations</a></li>
-        <li><a href="#validatefields">ValidateFieldsForm</a></li>
-        <li><a href="#testform">TestForm</a></li>
-        <li><a href="#testsubmit">TestSubmit</a></li>
-        <li><a href="#gestor">Gestor</a></li>
-        <li><a href="#workflows">Diagramas de Flujo</a></li>
-    </ul>
-</div>
-
-<div class="api-container">
-
-    <!-- ================================================ -->
-    <!-- OVERVIEW                                         -->
-    <!-- ================================================ -->
-    <div class="api-section" id="overview">
-        <h2>Descripción General</h2>
-        <p class="section-intro">
-            Sistema de pruebas para validar la estructura, definiciones de test y envío de
-            formularios de entidades de base de datos. Se compone de cinco clases JavaScript
-            organizadas en ficheros independientes.
-        </p>
-
-        <h3>Estructura de ficheros</h3>
-        <div class="code-block">CODIGO/
-├── index.html
-├── API.html
-├── menu_entidades.js
-├── Gestor_Class.js
-├── TestForm_Class.js
-├── TestSubmit_Class.js
-├── ValidateFieldsForm_Class.js
-├── Validations_Class.js
-├── css/IU.css
-├── project/
-│   ├── project_estructura.js
-│   ├── project_tests.js          ← contiene project_def_tests y project_pruebas
-│   ├── project_TestSubmit.js
-│   └── project_Class.js
-├── analysis/
-│   ├── analysis_preparation_estructura.js
-│   ├── analysis_preparation_tests.js
-│   ├── analysis_preparation_TestSubmit.js
-│   └── analysis_preparation_Class.js
-└── characteristic/
-    ├── characteristic_estructura.js
-    ├── characteristic_tests.js
-    ├── characteristic_TestSubmit.js
-    └── characteristic_Class.js</div>
-
-        <h3>Clasificación de clases</h3>
-        <table class="table-params">
-            <tr><th>Clase</th><th>Fichero</th><th>Categoría</th><th>Descripción</th></tr>
-            <tr><td>Gestor</td><td>Gestor_Class.js</td><td>Coordinación</td><td>Carga y valida variables de entidad; orquesta TestForm y TestSubmit</td></tr>
-            <tr><td>TestForm</td><td>TestForm_Class.js</td><td>Tests de atributos</td><td>Analiza estructura, definiciones y ejecuta pruebas de validación</td></tr>
-            <tr><td>TestSubmit</td><td>TestSubmit_Class.js</td><td>Tests de formulario</td><td>Ejecuta CheckSubmit sobre pruebas de submit por acción</td></tr>
-            <tr><td>ValidateFieldsForm</td><td>ValidateFieldsForm_Class.js</td><td>Validaciones</td><td>Crea campos HTML individuales y delega validaciones a Validations</td></tr>
-            <tr><td>Validations</td><td>Validations_Class.js</td><td>Validaciones</td><td>Validaciones atómicas estáticas sobre IDs de elementos del DOM</td></tr>
-        </table>
-
-        <h3>Formato de variables de entidad</h3>
-        <p>Cada entidad expone cuatro variables globales leídas por Gestor:</p>
-        <table class="table-params">
-            <tr><th>Variable</th><th>Tipo</th><th>Fichero</th><th>Descripción</th></tr>
-            <tr><td><code>nombreentidad_estructura</code></td><td>Object</td><td>nombreentidad_estructura.js</td><td>Definición de atributos con html, db y rules</td></tr>
-            <tr><td><code>nombreentidad_def_tests</code></td><td>Array</td><td>nombreentidad_tests.js</td><td>Definiciones de tests (campo 0–7)</td></tr>
-            <tr><td><code>nombreentidad_pruebas</code></td><td>Array</td><td>nombreentidad_tests.js</td><td>Datos de prueba (campo 0–6)</td></tr>
-            <tr><td><code>nombreentidad_TestSubmit</code></td><td>Array</td><td>nombreentidad_TestSubmit.js</td><td>Pruebas de submit (campo 0–5)</td></tr>
-        </table>
-
-        <h3>Formato de def_tests</h3>
-        <div class="code-block">// [entidad, campo, elemento_html, num_def, descripcion, accion, resultado_esperado, msg_respuesta]
-const project_def_tests = [
-  ['project', 'name_project', 'input', 1, 'Campo requerido ADD', 'ADD', 'Campo requerido', 'El nombre es obligatorio'],
-  ['project', 'name_project', 'input', 2, 'Mínimo 15 caracteres ADD', 'ADD', 'Mínimo 15 caracteres requerido', '...'],
-  // ...
-];</div>
-
-        <h3>Formato de pruebas</h3>
-        <div class="code-block">// [entidad, campo, num_def, num_prueba, accion, [{campo: valor, mimeType?, size?}], resultado_esperado]
-const project_pruebas = [
-  ['project', 'name_project', 1, 1, 'ADD', [{name_project: ''}], 'Campo requerido'],
-  ['project', 'name_project', 2, 2, 'ADD', [{name_project: 'abc'}], 'Mínimo 15 caracteres requerido'],
-  ['project', 'name_project', 3, 3, 'ADD', [{name_project: 'Valid Project Name OK'}], true],
-  // ...
-];</div>
-
-        <h3>Formato de TestSubmit</h3>
-        <div class="code-block">// [entidad, accion, num, descripcion, {campos: valores}, resultado_esperado]
-const project_TestSubmit = [
-  ['project', 'ADD', 1, 'Submit ADD completo válido',
-    {name_project: 'Valid Project Name', start_date_project: '01/01/2020', ...}, true],
-  ['project', 'ADD', 2, 'Submit ADD sin nombre',
-    {name_project: '', ...}, 'name_project: Campo requerido'],
-  // ...
-];</div>
+    <div class="api-header">
+        <h1>Especificación de Clases, Métodos y Flujos de la API</h1>
+        <p>Documentación técnica rigurosa del sistema de pruebas organizada según la estructura obligatoria de evaluación.</p>
     </div>
 
-    <!-- ================================================ -->
-    <!-- VALIDATIONS                                      -->
-    <!-- ================================================ -->
-    <div class="api-section" id="validations">
-        <h2>Validations <span class="tag-file">Validations_Class.js</span></h2>
-        <p class="section-intro">
-            Clase con métodos <strong>estáticos</strong> de validación atómica. Todos reciben el
-            <code>id</code> del elemento HTML del DOM y devuelven <code>true</code> si es válido
-            o un <code>string</code> con el mensaje de error.
-        </p>
-
-        <div class="class-doc">
-            <h3>Métodos estáticos</h3>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge static">Static</span> isRequired(elementId)</div>
-                <div class="method-signature">Validations.isRequired(elementId) → true | string</div>
-                <div class="method-description">Valida que el campo no esté vacío (valor.trim() !== '').</div>
-                <table class="table-params">
-                    <tr><th>Parámetro</th><th>Tipo</th><th>Descripción</th></tr>
-                    <tr><td>elementId</td><td>string</td><td>ID del elemento HTML</td></tr>
-                </table>
-                <p><strong>Retorna:</strong> <code>true</code> o <code>'Campo requerido'</code></p>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge static">Static</span> isInteger(elementId)</div>
-                <div class="method-signature">Validations.isInteger(elementId) → true | string</div>
-                <div class="method-description">Valida que el valor sea solo dígitos (<code>/^\d+$/</code>). Si está vacío, devuelve <code>true</code>.</div>
-                <table class="table-params">
-                    <tr><th>Parámetro</th><th>Tipo</th><th>Descripción</th></tr>
-                    <tr><td>elementId</td><td>string</td><td>ID del elemento HTML</td></tr>
-                </table>
-                <p><strong>Retorna:</strong> <code>true</code> o <code>'Solo se permiten dígitos'</code></p>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge static">Static</span> hasMinSize(elementId, minSize)</div>
-                <div class="method-signature">Validations.hasMinSize(elementId, minSize) → true | string</div>
-                <div class="method-description">Valida que la longitud del valor sea mayor o igual a <code>minSize</code>.</div>
-                <table class="table-params">
-                    <tr><th>Parámetro</th><th>Tipo</th><th>Descripción</th></tr>
-                    <tr><td>elementId</td><td>string</td><td>ID del elemento HTML</td></tr>
-                    <tr><td>minSize</td><td>number</td><td>Longitud mínima requerida</td></tr>
-                </table>
-                <p><strong>Retorna:</strong> <code>true</code> o <code>'Mínimo N caracteres requerido'</code></p>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge static">Static</span> hasMaxSize(elementId, maxSize)</div>
-                <div class="method-signature">Validations.hasMaxSize(elementId, maxSize) → true | string</div>
-                <div class="method-description">Valida que la longitud del valor sea menor o igual a <code>maxSize</code>.</div>
-                <table class="table-params">
-                    <tr><th>Parámetro</th><th>Tipo</th><th>Descripción</th></tr>
-                    <tr><td>elementId</td><td>string</td><td>ID del elemento HTML</td></tr>
-                    <tr><td>maxSize</td><td>number</td><td>Longitud máxima permitida</td></tr>
-                </table>
-                <p><strong>Retorna:</strong> <code>true</code> o <code>'Máximo N caracteres permitido'</code></p>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge static">Static</span> noAccents(elementId)</div>
-                <div class="method-signature">Validations.noAccents(elementId) → true | string</div>
-                <div class="method-description">Detecta acentos y ñ mediante expresión regular. Si el campo está vacío devuelve <code>true</code>.</div>
-                <p><strong>Retorna:</strong> <code>true</code> o <code>'No se permiten acentos o ñ'</code></p>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge static">Static</span> noSpaces(elementId)</div>
-                <div class="method-signature">Validations.noSpaces(elementId) → true | string</div>
-                <div class="method-description">Detecta cualquier carácter de espacio en blanco (<code>/\s/</code>).</div>
-                <p><strong>Retorna:</strong> <code>true</code> o <code>'No se permiten espacios'</code></p>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge static">Static</span> isValidDate(elementId)</div>
-                <div class="method-signature">Validations.isValidDate(elementId) → true | string</div>
-                <div class="method-description">Valida formato <code>DD/MM/YYYY</code> y que la fecha sea real.</div>
-                <p><strong>Retorna:</strong> <code>true</code>, <code>'Formato debe ser DD/MM/YYYY'</code> o <code>'Fecha inválida'</code></p>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge static">Static</span> dateNotBefore(elementId, minYear)</div>
-                <div class="method-signature">Validations.dateNotBefore(elementId, minYear) → true | string</div>
-                <div class="method-description">Valida que el año de la fecha sea mayor o igual a <code>minYear</code>.</div>
-                <table class="table-params">
-                    <tr><th>Parámetro</th><th>Tipo</th><th>Descripción</th></tr>
-                    <tr><td>elementId</td><td>string</td><td>ID del elemento HTML</td></tr>
-                    <tr><td>minYear</td><td>number</td><td>Año mínimo permitido</td></tr>
-                </table>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge static">Static</span> dateNotAfter(elementId, maxYear)</div>
-                <div class="method-signature">Validations.dateNotAfter(elementId, maxYear) → true | string</div>
-                <div class="method-description">Valida que el año de la fecha sea menor o igual a <code>maxYear</code>.</div>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge static">Static</span> isValidFileType(elementId, allowedTypes)</div>
-                <div class="method-signature">Validations.isValidFileType(elementId, allowedTypes) → true | string</div>
-                <div class="method-description">Valida que el MIME type del fichero seleccionado esté en <code>allowedTypes</code>. Si no hay fichero devuelve <code>true</code>.</div>
-                <table class="table-params">
-                    <tr><th>Parámetro</th><th>Tipo</th><th>Descripción</th></tr>
-                    <tr><td>elementId</td><td>string</td><td>ID del input type=file</td></tr>
-                    <tr><td>allowedTypes</td><td>Array&lt;string&gt;</td><td>Lista de MIME types permitidos</td></tr>
-                </table>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge static">Static</span> validateFileSize(elementId, maxSizeBytes)</div>
-                <div class="method-signature">Validations.validateFileSize(elementId, maxSizeBytes) → true | string</div>
-                <div class="method-description">Valida que el fichero no supere <code>maxSizeBytes</code> bytes.</div>
-                <table class="table-params">
-                    <tr><th>Parámetro</th><th>Tipo</th><th>Descripción</th></tr>
-                    <tr><td>elementId</td><td>string</td><td>ID del input type=file</td></tr>
-                    <tr><td>maxSizeBytes</td><td>number</td><td>Tamaño máximo en bytes</td></tr>
-                </table>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge static">Static</span> isValidOption(elementId, validValues)</div>
-                <div class="method-signature">Validations.isValidOption(elementId, validValues) → true | string</div>
-                <div class="method-description">Valida que el valor seleccionado esté en <code>validValues</code>. Si está vacío devuelve <code>true</code>.</div>
-                <table class="table-params">
-                    <tr><th>Parámetro</th><th>Tipo</th><th>Descripción</th></tr>
-                    <tr><td>elementId</td><td>string</td><td>ID del select HTML</td></tr>
-                    <tr><td>validValues</td><td>Array&lt;string&gt;</td><td>Lista de valores aceptados</td></tr>
-                </table>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge static">Static</span> executeCustomValidation(elementId, customFunction)</div>
-                <div class="method-signature">Validations.executeCustomValidation(elementId, customFunction) → true | string</div>
-                <div class="method-description">Ejecuta una función de validación personalizada pasada como parámetro.</div>
-                <table class="table-params">
-                    <tr><th>Parámetro</th><th>Tipo</th><th>Descripción</th></tr>
-                    <tr><td>elementId</td><td>string</td><td>ID del elemento HTML</td></tr>
-                    <tr><td>customFunction</td><td>Function</td><td>Función que recibe el valor y devuelve <code>true</code> o string de error</td></tr>
-                </table>
-            </div>
-        </div>
+    <div class="api-nav">
+        <ul>
+            <li class="nav-back-button"><a href="index.html">← Volver a index.html</a></li>
+            <li><a href="#bloque-validaciones">1. Clases para Realizar Validaciones</a></li>
+            <li><a href="#bloque-tests">2. Clases para los Test de Atributos</a></li>
+            <li><a href="#bloque-submit">3. Clases para Comprobar el Submit</a></li>
+        </ul>
     </div>
 
-    <!-- ================================================ -->
-    <!-- VALIDATEFIELDSFORM                               -->
-    <!-- ================================================ -->
-    <div class="api-section" id="validatefields">
-        <h2>ValidateFieldsForm <span class="tag-file">ValidateFieldsForm_Class.js</span></h2>
-        <p class="section-intro">
-            Genera elementos HTML individuales por atributo a partir de la definición de la estructura,
-            y coordina la ejecución de validaciones de <code>Validations_Class</code>.
-            Usada internamente por <code>TestForm</code>.
-        </p>
+    <div class="api-container">
 
-        <div class="class-doc">
-            <h3>Constructor</h3>
-            <div class="method-signature">new ValidateFieldsForm(fieldDefinition, value = '', fieldName = '')</div>
-            <table class="table-params">
-                <tr><th>Parámetro</th><th>Tipo</th><th>Descripción</th></tr>
-                <tr><td>fieldDefinition</td><td>Object</td><td>Objeto con propiedades <code>html</code>, <code>db</code> y <code>rules</code> de la estructura</td></tr>
-                <tr><td>value</td><td>string</td><td>Valor inicial del campo (opcional)</td></tr>
-                <tr><td>fieldName</td><td>string</td><td>Nombre del campo (usado como id del elemento)</td></tr>
+        <div class="api-section" id="bloque-validaciones">
+            <h2>1. Clases desarrolladas para Realizar Validaciones</h2>
+            <p class="section-intro">
+                Componentes de la capa de servicios encargados del procesamiento y ejecución de las reglas físicas, de tipo de dato y restricciones atómicas sobre los campos del formulario.
+            </p>
+
+            <h3>Clase: <code>Validations</code></h3>
+            <p>Implementa las funciones estáticas de validación atómica directamente contra los elementos del DOM.</p>
+
+            <h4>Método: <code>isRequired</code></h4>
+            <p><strong>Descripción:</strong> Comprueba si un elemento HTML requerido contiene un valor que no esté vacío.</p>
+            <h5>Parámetros de Entrada:</h5>
+            <table class="api-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Tipo de dato</th>
+                        <th>Descripción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>elementId</code></td>
+                        <td>String</td>
+                        <td>El identificador único (ID) del elemento input en el DOM.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h5>Información Devuelta:</h5>
+            <table class="api-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Tipo de dato</th>
+                        <th>Descripción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>result</code></td>
+                        <td>Boolean | String</td>
+                        <td>Retorna <code>true</code> si el campo tiene datos; o el string <code>'Campo requerido'</code> si está vacío.</td>
+                    </tr>
+                </tbody>
             </table>
 
-            <h3>Métodos de instancia</h3>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge instance">Instance</span> createField()</div>
-                <div class="method-signature">createField() → string</div>
-                <div class="method-description">Genera el HTML del campo según <code>fieldDefinition.html.tag</code>:
-                    <code>input</code>, <code>textarea</code>, <code>select</code>, <code>date</code> o <code>file</code>.</div>
-                <p><strong>Retorna:</strong> string con el HTML del campo envuelto en <code>&lt;div class="form-group"&gt;</code></p>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge instance">Instance</span> getValue()</div>
-                <div class="method-signature">getValue() → string | File | null</div>
-                <div class="method-description">Lee el valor actual del elemento desde el DOM. Para campos <code>file</code> devuelve el objeto <code>File</code> o <code>null</code>.</div>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge instance">Instance</span> setValue(value)</div>
-                <div class="method-signature">setValue(value)</div>
-                <div class="method-description">Establece el valor del campo. No tiene efecto en campos <code>file</code> (restricción de seguridad del navegador).</div>
-                <table class="table-params">
-                    <tr><th>Parámetro</th><th>Tipo</th><th>Descripción</th></tr>
-                    <tr><td>value</td><td>string</td><td>Valor a asignar</td></tr>
-                </table>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge instance">Instance</span> validateField(action, entityClass)</div>
-                <div class="method-signature">validateField(action = 'ADD', entityClass = null) → Object</div>
-                <div class="method-description">Ejecuta todas las validaciones definidas en <code>rules.validations[action]</code>.</div>
-                <table class="table-params">
-                    <tr><th>Parámetro</th><th>Tipo</th><th>Descripción</th></tr>
-                    <tr><td>action</td><td>string</td><td>Acción a validar: <code>'ADD'</code>, <code>'EDIT'</code> o <code>'SEARCH'</code></td></tr>
-                    <tr><td>entityClass</td><td>Object|null</td><td>Instancia de la clase entidad para validaciones personalizadas</td></tr>
-                </table>
-                <p><strong>Retorna:</strong></p>
-                <div class="code-block">{ fieldName: string, isValid: boolean, errors: [{rule, message}], warnings: [] }</div>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge instance">Instance</span> clear()</div>
-                <div class="method-signature">clear()</div>
-                <div class="method-description">Limpia el campo estableciendo su valor como cadena vacía.</div>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge instance">Instance</span> getElementId()</div>
-                <div class="method-signature">getElementId() → string</div>
-                <div class="method-description">Devuelve el ID del elemento HTML generado (<code>'field_' + fieldName</code>).</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ================================================ -->
-    <!-- TESTFORM                                         -->
-    <!-- ================================================ -->
-    <div class="api-section" id="testform">
-        <h2>TestForm <span class="tag-file">TestForm_Class.js</span></h2>
-        <p class="section-intro">
-            Clase de <strong>tests de atributos</strong>. Analiza la estructura de la entidad,
-            valida las definiciones de test y los datos de prueba, ejecuta todas las pruebas
-            y presenta los resultados en una ventana modal con scroll horizontal y vertical.
-        </p>
-
-        <div class="class-doc">
-            <h3>Constructor</h3>
-            <div class="method-signature">new TestForm(entityName, gestor)</div>
-            <table class="table-params">
-                <tr><th>Parámetro</th><th>Tipo</th><th>Descripción</th></tr>
-                <tr><td>entityName</td><td>string</td><td>Nombre de la entidad (p.ej. <code>'project'</code>)</td></tr>
-                <tr><td>gestor</td><td>Gestor</td><td>Instancia de Gestor que provee estructura, def_tests, pruebas y clase entidad</td></tr>
+            <h4>Método: <code>isInteger</code></h4>
+            <p><strong>Descripción:</strong> Evalúa si el valor cargado en el input es un número entero válido mediante expresiones regulares.</p>
+            <h5>Parámetros de Entrada:</h5>
+            <table class="api-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Tipo de dato</th>
+                        <th>Descripción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>elementId</code></td>
+                        <td>String</td>
+                        <td>El identificador único (ID) del elemento input a analizar.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h5>Información Devuelta:</h5>
+            <table class="api-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Tipo de dato</th>
+                        <th>Descripción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>result</code></td>
+                        <td>Boolean | String</td>
+                        <td>Retorna <code>true</code> si está vacío o es entero; o el string <code>'Solo se permiten dígitos'</code> si falla el formato.</td>
+                    </tr>
+                </tbody>
             </table>
 
-            <h3>Métodos públicos</h3>
+            <h3>Clase: <code>ValidateFieldsForm</code></h3>
+            <p>Instancia campos individuales del formulario encapsulando sus definiciones, reglas operativas y adaptando los formatos de validación.</p>
 
-            <div class="method-doc">
-                <div class="method-name"><span class="badge instance">Instance</span> showWindow()</div>
-                <div class="method-signature">showWindow()</div>
-                <div class="method-description">
-                    Punto de entrada principal. Llama en orden a
-                    <code>analyzeStructure()</code>, <code>analyzeTestDefinitions()</code>,
-                    <code>analyzeTestData()</code> y <code>executeAllTests()</code>
-                    y pasa los resultados a <code>displayResults()</code>.
-                </div>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge instance">Instance</span> analyzeStructure()</div>
-                <div class="method-signature">analyzeStructure() → Object</div>
-                <div class="method-description">
-                    Verifica que <code>_estructura.attributes</code> sea un objeto no vacío
-                    con al menos un atributo.
-                </div>
-                <p><strong>Retorna:</strong></p>
-                <div class="code-block">{ valid: boolean, count: number, attributes: string }
-// o en caso de error:
-{ valid: false, error: string }</div>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge instance">Instance</span> analyzeTestDefinitions()</div>
-                <div class="method-signature">analyzeTestDefinitions() → Object</div>
-                <div class="method-description">
-                    Valida que cada entrada de <code>_def_tests</code> sea un array de ≥ 7 campos
-                    con los tipos correctos: <code>[string, string, string, number, string, string, true|string]</code>.
-                    Cuenta cuántas definiciones hay por atributo.
-                </div>
-                <p><strong>Retorna:</strong></p>
-                <div class="code-block">{ valid: boolean, count: number, wellDefined: number,
-  byAttribute: {fieldName: count}, issues: string[] }</div>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge instance">Instance</span> analyzeTestData()</div>
-                <div class="method-signature">analyzeTestData() → Object</div>
-                <div class="method-description">
-                    Valida que cada entrada de <code>_pruebas</code> sea un array de 7 campos
-                    con los tipos <code>[string, string, number, number, string, Array, true|string]</code>.
-                    Contabiliza pruebas de error y de éxito, y agrupa por número de definición de test.
-                </div>
-                <p><strong>Retorna:</strong></p>
-                <div class="code-block">{ valid: boolean, count: number, wellTyped: number,
-  byType: {error: number, success: number},
-  byDefTest: {defNum: {error, success}}, issues: string[] }</div>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge instance">Instance</span> executeAllTests()</div>
-                <div class="method-signature">executeAllTests() → Object</div>
-                <div class="method-description">
-                    Itera sobre todas las pruebas llamando a <code>executeIndividualTest()</code>.
-                    Compara el resultado obtenido con el esperado y contabiliza aciertos y fallos.
-                </div>
-                <p><strong>Retorna:</strong></p>
-                <div class="code-block">{ executed: number, correct: number, incorrect: number,
-  results: [{pruebaNum, defTestNum, testDescription, fieldName,
-             action, testValue, expectedResult, actualResult, passed, message}] }</div>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge instance">Instance</span> executeIndividualTest(prueba, index)</div>
-                <div class="method-signature">executeIndividualTest(prueba, index) → Object</div>
-                <div class="method-description">
-                    Ejecuta una prueba individual. Crea un elemento HTML temporal en el DOM,
-                    aplica las validaciones de la estructura para la acción indicada
-                    (delegando en <code>runValidations()</code>) y compara con el resultado esperado.
-                    Distingue entre campos de texto/fecha/select y campos <code>file</code>.
-                </div>
-                <table class="table-params">
-                    <tr><th>Parámetro</th><th>Tipo</th><th>Descripción</th></tr>
-                    <tr><td>prueba</td><td>Array</td><td>Entrada del array <code>_pruebas</code></td></tr>
-                    <tr><td>index</td><td>number</td><td>Índice de la prueba en el array</td></tr>
-                </table>
-                <p><strong>Retorna:</strong> objeto con <code>pruebaNum, fieldName, passed, message</code> entre otros</p>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge instance">Instance</span> runValidations(elementId, validations, isNullable, rawValue, action, fieldName, context)</div>
-                <div class="method-signature">runValidations(...) → true | string</div>
-                <div class="method-description">
-                    Aplica en orden las validaciones de la estructura sobre el elemento con <code>elementId</code>:
-                    <code>required</code>, <code>integer</code>, <code>min_size</code>, <code>max_size</code>,
-                    <code>exp_reg</code>, <code>valid_date</code> y <code>personalized</code>.
-                    Si el campo es nullable y está vacío, salta las validaciones de formato.
-                </div>
-                <p><strong>Retorna:</strong> <code>true</code> si todas las validaciones pasan, o el primer mensaje de error encontrado</p>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge instance">Instance</span> validateFileValue(rawValue, testObj, validations, isNullable, action)</div>
-                <div class="method-signature">validateFileValue(...) → true | string</div>
-                <div class="method-description">
-                    Valida campos de tipo <code>file</code>. Comprueba <code>no_file</code> / campo requerido,
-                    <code>type_file</code> (MIME), <code>max_size_file</code>, <code>format_name_file</code>
-                    y longitudes de nombre de fichero.
-                </div>
-                <table class="table-params">
-                    <tr><th>Parámetro</th><th>Tipo</th><th>Descripción</th></tr>
-                    <tr><td>rawValue</td><td>string|null</td><td>Nombre del fichero</td></tr>
-                    <tr><td>testObj</td><td>Object</td><td>Objeto con <code>mimeType</code> y <code>size</code></td></tr>
-                    <tr><td>validations</td><td>Object</td><td>Validaciones de la estructura para esta acción</td></tr>
-                    <tr><td>isNullable</td><td>boolean</td><td>Si el campo es nullable en esta acción</td></tr>
-                    <tr><td>action</td><td>string</td><td>Acción en curso</td></tr>
-                </table>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge instance">Instance</span> displayResults(results)</div>
-                <div class="method-signature">displayResults(results)</div>
-                <div class="method-description">
-                    Construye y añade al DOM una ventana modal con cuatro secciones:
-                    estructura, definiciones, datos de prueba y resultados de ejecución.
-                    Incluye un botón para abrir el detalle de cada prueba en otra ventana modal.
-                </div>
-                <table class="table-params">
-                    <tr><th>Parámetro</th><th>Tipo</th><th>Descripción</th></tr>
-                    <tr><td>results</td><td>Object</td><td><code>{structure, definitions, data, execution}</code></td></tr>
-                </table>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge instance">Instance</span> showDetailedResults(results)</div>
-                <div class="method-signature">showDetailedResults(results)</div>
-                <div class="method-description">
-                    Abre una nueva ventana modal con una tabla que muestra, para cada prueba:
-                    número, campo, descripción, acción, resultado esperado, resultado obtenido e indicador visual de éxito/error.
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ================================================ -->
-    <!-- TESTSUBMIT                                       -->
-    <!-- ================================================ -->
-    <div class="api-section" id="testsubmit">
-        <h2>TestSubmit <span class="tag-file">TestSubmit_Class.js</span></h2>
-        <p class="section-intro">
-            Clase de <strong>tests de formulario</strong>. Ejecuta pruebas de submit agrupadas
-            por acción (ADD, EDIT, SEARCH, …), validando todos los campos del formulario
-            a través de <code>checkSubmit()</code> y comparando con el resultado esperado.
-        </p>
-
-        <div class="class-doc">
-            <h3>Constructor</h3>
-            <div class="method-signature">new TestSubmit(entityName, gestor)</div>
-            <table class="table-params">
-                <tr><th>Parámetro</th><th>Tipo</th><th>Descripción</th></tr>
-                <tr><td>entityName</td><td>string</td><td>Nombre de la entidad</td></tr>
-                <tr><td>gestor</td><td>Gestor</td><td>Instancia de Gestor que provee estructura, TestSubmit y clase entidad</td></tr>
+            <h4>Método: <code>validateField</code></h4>
+            <p><strong>Descripción:</strong> Ejecuta un control condicional en bucle que mapea las reglas de la instancia y delega en el motor estático de <code>Validations</code>.</p>
+            <h5>Parámetros de Entrada:</h5>
+            <table class="api-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Tipo de dato</th>
+                        <th>Descripción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>ruleName</code></td>
+                        <td>String</td>
+                        <td>Nombre identificativo de la regla de validación a ejecutar (ej. 'minSize', 'maxSize', 'format').</td>
+                    </tr>
+                    <tr>
+                        <td><code>params</code></td>
+                        <td>Object</td>
+                        <td>Parámetros adicionales requeridos para la regla (longitud, expresiones o tipos de archivo).</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h5>Información Devuelta:</h5>
+            <table class="api-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Tipo de dato</th>
+                        <th>Descripción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>status</code></td>
+                        <td>Boolean | String</td>
+                        <td>El resultado procedente de la invocación de la función estática de validación correspondiente.</td>
+                    </tr>
+                </tbody>
             </table>
 
-            <h3>Métodos públicos</h3>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge instance">Instance</span> showWindow()</div>
-                <div class="method-signature">showWindow()</div>
-                <div class="method-description">
-                    Punto de entrada principal. Verifica que existan pruebas de submit,
-                    llama a <code>analyzeAllActions()</code> y pasa los resultados a <code>displayResults()</code>.
+            <h3>Diagrama de Flujo del Proceso a Nivel de Código (Validaciones):</h3>
+            <div class="flow-container">
+                <div class="flow-card">
+                    <div class="flow-badge">Inicio</div>
+                    <h4>Orquestación</h4>
+                    <p><code>ValidateFieldsForm</code> procesa las directivas del campo y dispara sus reglas.</p>
                 </div>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge instance">Instance</span> analyzeAllActions()</div>
-                <div class="method-signature">analyzeAllActions() → Object</div>
-                <div class="method-description">
-                    Determina el conjunto de acciones distintas presentes en <code>_TestSubmit</code>
-                    (campo índice 1) y llama a <code>analyzeAction()</code> para cada una.
+                <div class="flow-connector">➔</div>
+                <div class="flow-card">
+                    <h4>Bifurcación Condicional</h4>
+                    <p>Un bloque <code>switch(rule)</code> redirige el flujo al método estático adecuado de la clase de servicios.</p>
                 </div>
-                <p><strong>Retorna:</strong> <code>{ ACTION: {action, count, correct, incorrect, results} }</code></p>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge instance">Instance</span> analyzeAction(action)</div>
-                <div class="method-signature">analyzeAction(action) → Object</div>
-                <div class="method-description">
-                    Filtra las pruebas de <code>_TestSubmit</code> para la acción dada
-                    y ejecuta cada una con <code>executeSubmitTest()</code>.
+                <div class="flow-connector">➔</div>
+                <div class="flow-card">
+                    <h4>Consulta DOM</h4>
+                    <p><code>Validations.isRequired()</code> o <code>isInteger()</code> extraen el valor mediante <code>document.getElementById()</code>.</p>
                 </div>
-                <table class="table-params">
-                    <tr><th>Parámetro</th><th>Tipo</th><th>Descripción</th></tr>
-                    <tr><td>action</td><td>string</td><td>Nombre de la acción: <code>'ADD'</code>, <code>'EDIT'</code>, <code>'SEARCH'</code>, etc.</td></tr>
-                </table>
-                <p><strong>Retorna:</strong> <code>{ action, count, correct, incorrect, results }</code></p>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge instance">Instance</span> executeSubmitTest(action, test, index)</div>
-                <div class="method-signature">executeSubmitTest(action, test, index) → Object</div>
-                <div class="method-description">
-                    Ejecuta una prueba de submit individual llamando a <code>checkSubmit(action, formData)</code>
-                    y comparando el resultado obtenido con el esperado.
-                </div>
-                <table class="table-params">
-                    <tr><th>Parámetro</th><th>Tipo</th><th>Descripción</th></tr>
-                    <tr><td>action</td><td>string</td><td>Acción de la prueba</td></tr>
-                    <tr><td>test</td><td>Array</td><td>Entrada del array <code>_TestSubmit</code></td></tr>
-                    <tr><td>index</td><td>number</td><td>Índice de la prueba</td></tr>
-                </table>
-                <p><strong>Retorna:</strong></p>
-                <div class="code-block">{ num, description, action, expectedResult, actualResult,
-  shouldHaveError, hasError, correct, message }</div>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge instance">Instance</span> checkSubmit(action, formData)</div>
-                <div class="method-signature">checkSubmit(action, formData) → true | string</div>
-                <div class="method-description">
-                    Recorre todos los atributos de la estructura. Para cada campo presente en
-                    <code>formData</code>, aplica las validaciones correspondientes a la acción
-                    normalizada. No realiza la petición al back-end; devuelve todos los errores
-                    encontrados o <code>true</code> si todos los campos son válidos.
-                    Normaliza acciones: <code>CREATE→ADD</code>, <code>UPDATE→EDIT</code>, <code>READ/DELETE→SEARCH</code>.
-                </div>
-                <table class="table-params">
-                    <tr><th>Parámetro</th><th>Tipo</th><th>Descripción</th></tr>
-                    <tr><td>action</td><td>string</td><td>Nombre de la acción (se normaliza internamente)</td></tr>
-                    <tr><td>formData</td><td>Object</td><td>Mapa <code>{fieldName: value}</code> con los valores del formulario</td></tr>
-                </table>
-                <p><strong>Retorna:</strong> <code>true</code> si es válido, o el primer mensaje de error encontrado</p>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge instance">Instance</span> displayResults(analyses)</div>
-                <div class="method-signature">displayResults(analyses)</div>
-                <div class="method-description">
-                    Muestra una ventana modal con el resumen de pruebas por acción
-                    (total, correctas, incorrectas) e incluye un botón para ver el detalle completo.
-                </div>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge instance">Instance</span> showDetailedResults(allResults)</div>
-                <div class="method-signature">showDetailedResults(allResults)</div>
-                <div class="method-description">
-                    Abre una nueva ventana modal con una tabla por acción que muestra:
-                    número de prueba, descripción, resultado esperado, resultado obtenido e indicador visual.
+                <div class="flow-connector">➔</div>
+                <div class="flow-card highlight">
+                    <div class="flow-badge alert">Fin</div>
+                    <h4>Evaluación</h4>
+                    <p>Retorna <code>true</code> si supera las restricciones o un literal de cadena con el mensaje semántico de error.</p>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- ================================================ -->
-    <!-- GESTOR                                           -->
-    <!-- ================================================ -->
-    <div class="api-section" id="gestor">
-        <h2>Gestor <span class="tag-file">Gestor_Class.js</span></h2>
-        <p class="section-intro">
-            Clase de coordinación. Lee las variables globales de la entidad desde
-            <code>window</code>, valida su existencia y las expone mediante getters para
-            que <code>TestForm</code> y <code>TestSubmit</code> puedan consumirlas.
-            También renderiza los botones de test en la zona de trabajo de <code>index.html</code>.
-        </p>
+        <div class="api-section" id="bloque-tests">
+            <h2>2. Clases desarrolladas para los Test de Atributos</h2>
+            <p class="section-intro">
+                Componentes dedicados a la automatización de las pruebas físicas integrales del modelo, auditando el formato de las definiciones y procesando las matrices de prueba.
+            </p>
 
-        <div class="class-doc">
-            <h3>Constructor</h3>
-            <div class="method-signature">new Gestor(entityName)</div>
-            <p>Invoca <code>validateEntityFiles()</code> inmediatamente. Lanza <code>Error</code>
-            si alguna variable requerida no existe en <code>window</code>.</p>
-            <table class="table-params">
-                <tr><th>Parámetro</th><th>Tipo</th><th>Descripción</th></tr>
-                <tr><td>entityName</td><td>string</td><td>Nombre de la entidad (p.ej. <code>'project'</code>)</td></tr>
+            <h3>Clase: <code>TestForm</code></h3>
+            <p>Se encarga de ejecutar el análisis estructural completo y la batería iterativa de pruebas sobre los atributos.</p>
+
+            <h4>Método: <code>analyzeStructure</code></h4>
+            <p><strong>Descripción:</strong> Audita la variable de configuración estructural para garantizar que sea un objeto existente y válido.</p>
+            <h5>Parámetros de Entrada:</h5>
+            <p><em>Ninguno (Lee las propiedades locales asignadas en el constructor: <code>this.estructura</code>).</em></p>
+            <h5>Información Devuelta:</h5>
+            <table class="api-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Tipo de dato</th>
+                        <th>Descripción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>analysis</code></td>
+                        <td>Object</td>
+                        <td>Objeto de control que devuelve un estado binario y el literal del error encontrado: <code>{ valid: Boolean, error: String }</code>.</td>
+                    </tr>
+                </tbody>
             </table>
 
-            <h3>Métodos públicos</h3>
+            <h4>Método: <code>executeAllTests</code></h4>
+            <p><strong>Descripción:</strong> Ejecuta el procesamiento iterativo en un bucle que recorre la matriz completa de pruebas contrastando los resultados.</p>
+            <h5>Parámetros de Entrada:</h5>
+            <p><em>Ninguno.</em></p>
+            <h5>Información Devuelta:</h5>
+            <table class="api-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Tipo de dato</th>
+                        <th>Descripción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>resultsArray</code></td>
+                        <td>Array (of Objects)</td>
+                        <td>Matriz con objetos detallados de cada iteración conteniendo: número de prueba, campo, esperado, obtenido y estatus (OK/FAIL).</td>
+                    </tr>
+                </tbody>
+            </table>
 
-            <div class="method-doc">
-                <div class="method-name"><span class="badge instance">Instance</span> validateEntityFiles()</div>
-                <div class="method-signature">validateEntityFiles()</div>
-                <div class="method-description">
-                    Comprueba la existencia en <code>window</code> de:
-                    <code>nombreentidad_estructura</code>, <code>nombreentidad_def_tests</code>,
-                    <code>nombreentidad_pruebas</code> y <code>nombreentidad_TestSubmit</code>.
-                    Si alguna falta, lanza un Error con el listado de variables no encontradas.
-                    También intenta instanciar la clase de entidad (<code>NombreEntidad</code>) si existe.
+            <h3>Clase Auxiliar de Inicialización: <code>Gestor</code></h3>
+            <p>Componente que actúa como pasarela unificada, validando los entornos globales del navegador antes de ceder el control al motor de tests.</p>
+
+            <h4>Método: <code>validateEntityFiles</code></h4>
+            <p><strong>Descripción:</strong> Comprueba con el operador reflexivo <code>typeof window[...]</code> que las variables requeridas en los scripts estén correctamente instanciadas en la ventana global.</p>
+            <h5>Parámetros de Entrada:</h5>
+            <p><em>Ninguno.</em></p>
+            <h5>Información Devuelta:</h5>
+            <table class="api-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Tipo de dato</th>
+                        <th>Descripción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>void</code></td>
+                        <td>Undefined</td>
+                        <td>No tiene retorno explícito. Si falla, acumula los errores y detiene la aplicación interrumpiendo el flujo mediante un <code>throw new Error</code>.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Diagrama de Flujo del Proceso a Nivel de Código (Tests de Atributos):</h3>
+            <div class="flow-container">
+                <div class="flow-card">
+                    <div class="flow-badge">1</div>
+                    <h4>Auditoría de Entorno</h4>
+                    <p><code>Gestor.validateEntityFiles()</code> comprueba las colecciones estructurales de <code>window</code> en memoria.</p>
                 </div>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge instance">Instance</span> loadEntity(workArea)</div>
-                <div class="method-signature">loadEntity(workArea)</div>
-                <div class="method-description">
-                    Inyecta en <code>workArea</code> el HTML con los dos botones:
-                    <em>Test de Atributos</em> (invoca <code>testAttributesButton()</code>) y
-                    <em>Test de Formulario</em> (invoca <code>testFormButton()</code>).
+                <div class="flow-connector">➔</div>
+                <div class="flow-card">
+                    <h4>2: Análisis Formal</h4>
+                    <p><code>TestForm.showWindow()</code> invoca secuencialmente a <code>analyzeStructure()</code> y a los evaluadores de definiciones.</p>
                 </div>
-                <table class="table-params">
-                    <tr><th>Parámetro</th><th>Tipo</th><th>Descripción</th></tr>
-                    <tr><td>workArea</td><td>HTMLElement</td><td>Contenedor donde mostrar la interfaz</td></tr>
-                </table>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge instance">Instance</span> getStructure()</div>
-                <div class="method-signature">getStructure() → Object</div>
-                <div class="method-description">Devuelve el objeto <code>_estructura</code> de la entidad.</div>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge instance">Instance</span> getDefTests()</div>
-                <div class="method-signature">getDefTests() → Array</div>
-                <div class="method-description">Devuelve el array <code>_def_tests</code> de la entidad.</div>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge instance">Instance</span> getTestsFields()</div>
-                <div class="method-signature">getTestsFields() → Array</div>
-                <div class="method-description">Devuelve el array <code>_pruebas</code> de la entidad.</div>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge instance">Instance</span> getTestSubmit()</div>
-                <div class="method-signature">getTestSubmit() → Array</div>
-                <div class="method-description">Devuelve el array <code>_TestSubmit</code> de la entidad.</div>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge instance">Instance</span> getEntityClass()</div>
-                <div class="method-signature">getEntityClass() → Object | null</div>
-                <div class="method-description">
-                    Devuelve la instancia de la clase de entidad si se pudo instanciar, o <code>null</code>.
-                    Usada por TestForm y TestSubmit para invocar validaciones personalizadas
-                    (<code>fieldName_personalized_validation()</code>).
+                <div class="flow-connector">➔</div>
+                <div class="flow-card">
+                    <h4>3: Bucle Iterativo</h4>
+                    <p><code>executeAllTests()</code> mapea la matriz de datos de prueba y computa las aserciones lógicas frente al valor esperado.</p>
                 </div>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge instance">Instance</span> validateStructure()</div>
-                <div class="method-signature">validateStructure() → Object</div>
-                <div class="method-description">
-                    Verifica que <code>_estructura.attributes</code> sea un objeto con las
-                    secciones requeridas (<code>html</code>, <code>db</code>, <code>rules</code>) en cada atributo.
-                </div>
-                <p><strong>Retorna:</strong> <code>{ valid, totalAttributes, validAttributes, attributes }</code></p>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge instance">Instance</span> validateDefTests()</div>
-                <div class="method-signature">validateDefTests() → Object</div>
-                <div class="method-description">
-                    Valida la estructura del array <code>_def_tests</code> y cuenta entradas por atributo.
-                </div>
-                <p><strong>Retorna:</strong> <code>{ valid, totalTests, validTests, testsByAttribute }</code></p>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge instance">Instance</span> validateTests()</div>
-                <div class="method-signature">validateTests() → Object</div>
-                <div class="method-description">
-                    Valida la estructura del array <code>_pruebas</code> y contabiliza pruebas
-                    de éxito (<code>expectedResult === true</code>) y de error (string).
-                </div>
-                <p><strong>Retorna:</strong> <code>{ valid, totalTests, validStructure, successTests, errorTests }</code></p>
-            </div>
-
-            <h3>Funciones globales auxiliares</h3>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge static">Global</span> testAttributesButton(entityName)</div>
-                <div class="method-signature">testAttributesButton(entityName)</div>
-                <div class="method-description">
-                    Crea un <code>Gestor</code> y un <code>TestForm</code> para la entidad indicada
-                    y llama a <code>testForm.showWindow()</code>. En caso de error muestra un modal.
-                </div>
-            </div>
-
-            <div class="method-doc">
-                <div class="method-name"><span class="badge static">Global</span> testFormButton(entityName)</div>
-                <div class="method-signature">testFormButton(entityName)</div>
-                <div class="method-description">
-                    Crea un <code>Gestor</code> y un <code>TestSubmit</code> para la entidad indicada
-                    y llama a <code>testSubmit.showWindow()</code>. En caso de error muestra un modal.
+                <div class="flow-connector">➔</div>
+                <div class="flow-card highlight">
+                    <div class="flow-badge alert">UI</div>
+                    <h4>4: Inyección DOM</h4>
+                    <p><code>displayResults()</code> monta de manera dinámica el árbol modal y dibuja la tabla pintando las filas según las clases semánticas.</p>
                 </div>
             </div>
         </div>
+
+        <div class="api-section" id="bloque-submit">
+            <h2>3. Clases desarrolladas para Comprobar el Submit</h2>
+            <p class="section-intro">
+                Módulos encargados de simular y certificar el comportamiento y respuestas del sistema frente a eventos de persistencia u operaciones de guardado de formularios de la entidad.
+            </p>
+
+            <h3>Clase: <code>TestSubmit</code></h3>
+            <p>Modela el motor de análisis agrupado de peticiones CRUD simulando la sumisión completa de datos de campos del formulario.</p>
+
+            <h4>Método: <code>analyzeAllActions</code></h4>
+            <p><strong>Descripción:</strong> Extrae mediante la estructura indexada <code>Set</code> los tipos únicos de acciones CRUD que componen el set de pruebas.</p>
+            <h5>Parámetros de Entrada:</h5>
+            <p><em>Ninguno (Consume los datos almacenados de forma interna en el miembro <code>this.testSubmitData</code>).</em></p>
+            <h5>Información Devuelta:</h5>
+            <table class="api-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Tipo de dato</th>
+                        <th>Descripción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>groupAnalyses</code></td>
+                        <td>Object</td>
+                        <td>Diccionario indexado por acciones (ADD, EDIT, SEARCH) que acumula los balances y contadores de aciertos del submit.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>Método: <code>showWindow</code></h4>
+            <p><strong>Descripción:</strong> Método coordinador principal del submit. Valida la existencia del array de datos o interrumpe el flujo delegando el error visual.</p>
+            <h5>Parámetros de Entrada:</h5>
+            <p><em>Ninguno.</em></p>
+            <h5>Información Devuelta:</h5>
+            <table class="api-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Tipo de dato</th>
+                        <th>Descripción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>void</code></td>
+                        <td>Undefined</td>
+                        <td>Genera, inyecta y visualiza la estructura del modal interactivo sobre el <code>document.body</code>.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Diagrama de Flujo del Proceso a Nivel de Código (Comprobación de Submit):</h3>
+            <div class="flow-container">
+                <div class="flow-card">
+                    <div class="flow-badge">Inicio</div>
+                    <h4>Filtro de Datos</h4>
+                    <p><code>showWindow()</code> evalúa el estado del array de sumisión. Si viene vacío, aborta la ejecución llamando a <code>showError()</code>.</p>
+                </div>
+                <div class="flow-connector">➔</div>
+                <div class="flow-card">
+                    <h4>Agrupación Dinámica</h4>
+                    <p><code>analyzeAllActions()</code> itera aislando las acciones en una estructura <code>Set</code> para independizar los casos.</p>
+                </div>
+                <div class="flow-connector">➔</div>
+                <div class="flow-card">
+                    <h4>Evaluación de Bloque</h4>
+                    <p>Se evalúa el conjunto completo de atributos requeridos simulando el envío del formulario bajo el contexto operativo de la acción.</p>
+                </div>
+                <div class="flow-connector">➔</div>
+                <div class="flow-card highlight">
+                    <div class="flow-badge alert">Fin</div>
+                    <h4>Renderizado</h4>
+                    <p><code>displayResults()</code> segmenta la vista modal por operaciones CRUD e inyecta las tablas analíticas de éxito/error del submit.</p>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <!-- ================================================ -->
-    <!-- WORKFLOWS                                        -->
-    <!-- ================================================ -->
-    <div class="api-section" id="workflows">
-        <h2>Diagramas de Flujo</h2>
+    <footer>
+        <p>Interfaces de Usuario - Sistema de Pruebas</p>
+    </footer>
 
-        <h3>Flujo 1: Arranque de la aplicación (index.html → Gestor)</h3>
-        <div class="workflow-diagram">Carga index.html
-    │
-    ├─ Incluye menu_entidades.js  →  var menu_entidades = ['project', 'analysis_preparation', ...]
-    │
-    └─ Usuario pulsa entidad del menú
-           │
-           └─ Se cargan por &lt;script&gt; todos los ficheros de esa entidad:
-                  nombreentidad_estructura.js
-                  nombreentidad_tests.js          (def_tests + pruebas)
-                  nombreentidad_TestSubmit.js
-                  nombreentidad_Class.js          (opcional)
-                  │
-                  └─ new Gestor(entityName)
-                         │
-                         ├─ validateEntityFiles()  →  comprueba window[var]
-                         │      ├─ OK  →  almacena referencias internas
-                         │      └─ ERROR  →  modal con variables no encontradas
-                         │
-                         └─ gestor.loadEntity(workArea)
-                                └─ Renderiza botones en zona de trabajo</div>
-
-        <h3>Flujo 2: Test de Atributos (TestForm)</h3>
-        <div class="workflow-diagram">Usuario pulsa "Test de Atributos"
-    │
-    └─ testAttributesButton(entityName)
-           │
-           └─ new TestForm(entityName, gestor)
-                  │
-                  └─ testForm.showWindow()
-                         │
-                         ├─ analyzeStructure()
-                         │      └─ Verifica _estructura.attributes (objeto, no vacío)
-                         │
-                         ├─ analyzeTestDefinitions()
-                         │      └─ Por cada entrada de _def_tests:
-                         │             - Comprueba longitud ≥ 7 y tipos correctos
-                         │             - Cuenta entradas por campo
-                         │
-                         ├─ analyzeTestData()
-                         │      └─ Por cada entrada de _pruebas:
-                         │             - Comprueba longitud = 7 y tipos correctos
-                         │             - Clasifica en error / éxito
-                         │             - Agrupa por num_def
-                         │
-                         ├─ executeAllTests()
-                         │      └─ Por cada prueba:
-                         │             - executeIndividualTest()
-                         │                    ├─ Localiza def de test por defTestNum
-                         │                    ├─ Obtiene fieldDef de la estructura
-                         │                    ├─ Crea elemento HTML temporal en DOM
-                         │                    ├─ Si es file → validateFileValue()
-                         │                    └─ Si es texto → validateTextValue()
-                         │                           └─ runValidations()
-                         │                                  ├─ Validations.isRequired()
-                         │                                  ├─ Validations.isInteger()
-                         │                                  ├─ Validations.hasMinSize()
-                         │                                  ├─ Validations.hasMaxSize()
-                         │                                  ├─ RegExp (exp_reg)
-                         │                                  ├─ Validations.isValidDate()
-                         │                                  └─ entityClass.field_personalized_validation()
-                         │
-                         └─ displayResults({structure, definitions, data, execution})
-                                ├─ Modal con resumen (4 secciones)
-                                └─ Botón "Ver Detalles"
-                                       └─ showDetailedResults()
-                                              └─ Tabla con resultado de cada prueba</div>
-
-        <h3>Flujo 3: Test de Formulario (TestSubmit)</h3>
-        <div class="workflow-diagram">Usuario pulsa "Test de Formulario"
-    │
-    └─ testFormButton(entityName)
-           │
-           └─ new TestSubmit(entityName, gestor)
-                  │
-                  └─ testSubmit.showWindow()
-                         │
-                         └─ analyzeAllActions()
-                                │
-                                └─ Por cada acción distinta en _TestSubmit:
-                                       analyzeAction(action)
-                                           │
-                                           └─ Por cada prueba de esa acción:
-                                                  executeSubmitTest(action, test, index)
-                                                      │
-                                                      └─ checkSubmit(action, formData)
-                                                             │
-                                                             ├─ normalizeAction()
-                                                             │      CREATE→ADD / UPDATE→EDIT
-                                                             │      READ→SEARCH / DELETE→SEARCH
-                                                             │
-                                                             └─ Por cada campo en formData:
-                                                                    ├─ Obtiene validaciones[action]
-                                                                    ├─ Determina isNullable
-                                                                    ├─ Si es file → validateFileValue()
-                                                                    └─ Si es texto → validateFieldValue()
-                                                                           ├─ required
-                                                                           ├─ exp_reg
-                                                                           ├─ min_size / max_size
-                                                                           ├─ valid_date
-                                                                           └─ personalized
-                                       │
-                         displayResults(analyses)
-                                ├─ Modal con resumen por acción
-                                └─ Botón "Ver Detalles"
-                                       └─ showDetailedResults()
-                                              └─ Tabla por acción con resultado de cada prueba</div>
-
-        <h3>Estructura esperada de la _estructura</h3>
-        <div class="code-block">const project_estructura = {
-  attributes: {
-    id_project: {
-      html: { tag: 'input', type: 'text', component_visible_size: 11 },
-      db:   { is_null: { ADD: false, EDIT: false, SEARCH: true }, unique: false },
-      rules: {
-        validations: {
-          ADD:    { integer: true, min_size: 1, max_size: 11 },
-          EDIT:   { integer: true, min_size: 1, max_size: 11 },
-          SEARCH: {}
-        }
-      }
-    },
-    name_project: {
-      html: { tag: 'input', type: 'text', component_visible_size: 100 },
-      db:   { is_null: { ADD: false, EDIT: false, SEARCH: true }, unique: true },
-      rules: {
-        validations: {
-          ADD:    { min_size: 15, max_size: 100, exp_reg: '^[a-zA-Z ]+$' },
-          EDIT:   { min_size: 15, max_size: 100, exp_reg: '^[a-zA-Z ]+$' },
-          SEARCH: {}
-        }
-      }
-    },
-    end_date_project: {
-      html: { tag: 'input', type: 'text' },
-      db:   { is_null: { ADD: false, EDIT: false, SEARCH: true } },
-      rules: {
-        validations: {
-          ADD:    { valid_date: true, personalized: true },
-          EDIT:   { valid_date: true, personalized: true },
-          SEARCH: {}
-        }
-      }
-    },
-    file_project: {
-      html: { tag: 'file' },
-      db:   { is_null: { ADD: false, EDIT: true, SEARCH: true } },
-      rules: {
-        validations: {
-          ADD: {
-            type_file: [{ type_file: 'application/pdf' }, { type_file: 'application/msword' }],
-            max_size_file: [{ max_size_file: 2000000 }],
-            format_name_file: [{ format_name_file: '^[a-zA-Z.]+$' }],
-            min_size: 7,
-            max_size: 100
-          },
-          EDIT:   {},
-          SEARCH: {}
-        }
-      }
-    }
-  }
-};</div>
-
-        <h3>Validaciones personalizadas en la clase entidad</h3>
-        <div class="code-block">// nombreentidad_Class.js
-class Project {
-    // Para end_date_project: debe ser posterior a start_date_project
-    end_date_project_personalized_validation(value, context) {
-        // context es el objeto de la prueba (valoresArr[0]) o formData
-        const startVal = context && context.start_date_project;
-        if (!startVal || !value) return true;
-        // comparar fechas y retornar true o mensaje de error
-        return true; // o 'La fecha de fin debe ser posterior a la de inicio'
-    }
-}</div>
-    </div>
-
-    <div class="footer-api">
-        <p>Sistema de Pruebas para Gestión de Entidades</p>
-    </div>
-
-</div>
 </body>
+
 </html>
