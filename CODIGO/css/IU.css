@@ -89,11 +89,11 @@ main {
 }
 
 /* ==========================================
-   MENÚ DE NAVEGACIÓN (HORIZONTAL)
+   MENÚ DE NAVEGACIÓN 
    ========================================== */
 
 nav {
-    background-color: var(--emphasis-color-2);
+    background-color: var(--medium-color);
     border-bottom: 2px solid var(--medium-color);
     /* Ya no lleva border-right */
 }
@@ -112,7 +112,7 @@ nav {
 .menu-divider {
     list-style: none;
     height: 1px;
-    background-color: var(--emphasis-color-2); 
+    background-color: var(--medium-color); 
     margin: 5px 15px 15px 15px;
     opacity: 0.5;
 }
