@@ -1,1 +1,1 @@
-info_entrega = ["Julio", "54675504L", "Ana Alvarez Lopez", 40];
+info_entrega = ["Julio", "54675504L", "Ana Alvarez Lopez", 50];
